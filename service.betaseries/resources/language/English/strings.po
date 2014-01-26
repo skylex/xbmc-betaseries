@@ -1,0 +1,65 @@
+# XBMC Media Center language file
+# Addon Name: BetaSeries Service
+# Addon id: service.betaseries
+# Addon Provider: skylex
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: XBMC Translation Team\n"
+"Language-Team: English (http://www.transifex.com/projects/p/xbmc-addons/language/en/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30000"
+msgid "General"
+msgstr ""
+
+#empty strings from id 30001 to 30003
+
+msgctxt "#30004"
+msgid "Activate BetaSeries.com service"
+msgstr ""
+
+msgctxt "#30005"
+msgid "Mark as viewed only when watched for the first time"
+msgstr ""
+
+msgctxt "#30006"
+msgid "BetaSeries.com username"
+msgstr ""
+
+msgctxt "#30007"
+msgid "BetaSeries.com password"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Mark previous episodes as watched"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Update status when marking as viewed in XBMC"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Update status when marking as not viewed in XBMC"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Automatically add new watched shows"
+msgstr ""
+
+#empty strings from id 30012 to 32000
+
+msgctxt "#32001"
+msgid "Authentication error"
+msgstr ""
+
+msgctxt "#32002"
+msgid "Please update the add-on"
+msgstr ""

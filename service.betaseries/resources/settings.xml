@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<category label="30000">
+		<setting id="betaactive" type="bool" label="30004" default="true"/>
+		<setting id="betauser" type="text" label="30006" default="" enable="eq(-1,true)"/>
+		<setting id="betapass" type="text" label="30007" default="" enable="eq(-2,true)" option="hidden"/>
+		<setting id="betafollow" type="bool" label="30011" default="true" enable="eq(-3,true)"/>
+		<setting id="betabulk" type="bool" label="30008" default="true" enable="eq(-4,true)"/>
+		<setting id="betamark" type="bool" label="30009" default="false" enable="eq(-5,true)"/>
+		<setting id="betaunmark" type="bool" label="30010" default="false" enable="eq(-6,true)"/>
+		<setting id="betafirst" type="bool" label="30005" default="false" enable="eq(-7,true)"/>
+	</category>
+</settings>
