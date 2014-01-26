@@ -8,8 +8,8 @@
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary>BetaSeries Add-on Repository</summary>
-		<description lang="en">This repository contains the BetaSeries.com add-on for XBMC and maintains it up to date.</description>
-		<description lang="fr">Ce dépôt contient l'extension BetaSeries.com pour XBMC et permet de la maintenir à jour.</description>
+		<description lang="en">This repository contains the BetaSeries.com add-on for XBMC and maintains it up to date</description>
+		<description lang="fr">Ce dépôt contient l'extension BetaSeries.com pour XBMC et permet de la maintenir à jour</description>
                 <disclaimer>If it breaks, you get to keep the pieces</disclaimer>
 		<platform>all</platform>
 	</extension>
@@ -29,6 +29,20 @@
 		<language></language>
 		<platform>all</platform>
 		<source>http://www.betaseries.com/wiki/Plugin%20XBMC</source>
+	</extension>
+</addon>
+
+<addon id="service.subtitles.betaseries" name="Betaseries" version="0.1" provider-name="fdonv">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0"/>
+	</requires>
+	<extension point="xbmc.subtitle.module" library="service.py" />
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<summary lang="en">BetaSeries subtitles service</summary>
+		<summary lang="fr">Service de sous-titres BetaSeries</summary>
+		<description lang="en">Search and download subtitles from BetaSeries.com</description>
+		<description lang="fr">Rechercher et télécharger des sous-titres depuis BetaSeries.com</description>
 	</extension>
 </addon>
 </addons>
