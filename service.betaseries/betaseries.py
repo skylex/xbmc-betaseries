@@ -33,7 +33,6 @@ def log(txt):
     xbmc.log(msg=message.encode("utf-8"), level=xbmc.LOGDEBUG)
 
 def get_urldata(url, urldata, method):
-    #log('#DEBUG# open url : %s %s' % (url, urldata))
     # create a handler
     handler = urllib2.HTTPSHandler()
     # create an openerdirector instance
@@ -53,7 +52,6 @@ def get_urldata(url, urldata, method):
         connection = e
     if connection.code:
         response = connection.read()
-        #log('#DEBUG# code %s, response : %s' % (connection.code, response))
         return response
     else:
         log('#DEBUG# response empty')
@@ -253,7 +251,6 @@ class MyPlayer(xbmc.Monitor):
         log('#DEBUG# Player Class Init')
 
     def onNotification( self, sender, method, data ):
-        #log("#DEBUG# notification : %s %s %s" % (sender, method, data))
         if sender == 'xbmc':
             if method == 'Player.OnPlay':
                 result = json.loads(data)
@@ -304,7 +301,6 @@ class MyMonitor(xbmc.Monitor):
 # change default user-agent
 class AppURLopener(urllib.FancyURLopener):
     def __init__( self, *args, **kwargs ):
-        #urllib.FancyURLopener.__init__( self )
         self.agent = kwargs['agent']
         version = self.agent
 
