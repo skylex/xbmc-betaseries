@@ -215,11 +215,11 @@ class Main:
                 service[6] = ''
                 log('%s: bad token for mark as %s' % (service[0], act))
             elif data['errors'][0]['code'] == 0:
-                log('%s: not following show, or episode %s already marked as %s' % (service[0], episode[1], act))
+                log('%s: not following show, or episode %s already marked as %s' % (service[0], episode[5], act))
             else:
-                log('%s: error marking episode %s as %s : %s' % (service[0], episode[1], act, data['errors'][0]['text']))
+                log('%s: error marking episode %s as %s : %s' % (service[0], episode[5], act, data['errors'][0]['text']))
         else:
-            log('#DEBUG# episode %s marked as %s' % (episode[1], act))
+            log('#DEBUG# episode %s marked as %s' % (episode[5], act))
         return service
 
     def _service_fail( self, service, timer ):
@@ -268,9 +268,10 @@ class MyPlayer(xbmc.Monitor):
                     if 'item' in result and result['item']['type'] == 'episode':
                         log("#DEBUG# episode status changed, id = %s, playcount = %s" % (result['item']['id'], result['playcount']))
                         episode = self._get_info(result['item']['id'], result['playcount'], self.Play)
-                        # mark as watched or not, depending on playcount
-                        self.action(episode, self.service)
-                        self.Play = False
+                        if episode:
+                            # mark as watched or not, depending on playcount
+                            self.action(episode, self.service)
+                            self.Play = False
 
     def _get_info( self, episodeid, playcount, playstatus ):
         tvshow_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"episodeid": ' + str(episodeid) + ', "properties": ["tvshowid", "showtitle", "season", "episode"]}, "id": 1}'
@@ -278,13 +279,23 @@ class MyPlayer(xbmc.Monitor):
 
         tvdbid_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshow['tvshowid']) + ', "properties": ["imdbnumber"]}, "id": 1}'
         tvdbid = json.loads(xbmc.executeJSONRPC (tvdbid_query))['result']['tvshowdetails']['imdbnumber']
-        
+
         url = self.service[1] + '/shows/episodes'
         urldata = '?v=2.2&key=' + self.service[2] + '&thetvdb_id=' + str(tvdbid) + '&season=' + str(tvshow['season']) + '&episode=' + str(tvshow['episode'])
-        tvdbepid_query = get_urldata(url + urldata, '', "GET")
-        tvdbepid = json.loads(tvdbepid_query)['episodes'][0]['thetvdb_id']
 
-        epinfo = [int(tvdbid), int(tvdbepid), int(playcount), bool(playstatus), str(tvshow['showtitle']), int(tvshow['season']), int(tvshow['episode'])]
+        try:
+            tvdbepid_query = get_urldata(url + urldata, '', "GET")
+            tvdbepid_query = json.loads(tvdbepid_query)
+            tvdbepid = tvdbepid_query['episodes'][0]['thetvdb_id']
+        except:
+            log("#DEBUG# error : could not fetch episode's thetvdb_id")
+            return False
+
+        # texts used for debug only
+        showtitle = tvshow['showtitle'].encode("utf-8")
+        epname = str(tvshow['season']) + 'x' + str(tvshow['episode'])
+
+        epinfo = [int(tvdbid), int(tvdbepid), int(playcount), bool(playstatus), showtitle, epname]
         log('#DEBUG# episode info: %s' % epinfo)
         return epinfo
 
