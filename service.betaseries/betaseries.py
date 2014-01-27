@@ -12,6 +12,8 @@
 # *  along with XBMC; see the file COPYING.  If not, write to
 # *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 # *  http://www.gnu.org/copyleft/gpl.html
+# *
+# * code structure and portions of code based on service.scrobbler.librefm by Team-XBMC
 
 import urllib, urllib2, socket, hashlib, time
 import xbmc, xbmcgui, xbmcaddon
