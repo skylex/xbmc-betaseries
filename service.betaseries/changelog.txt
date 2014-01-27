@@ -1,2 +1,5 @@
+1.0.1
+- bug fixes, new notification option, code cleanup
+
 1.0.0
 - initial release

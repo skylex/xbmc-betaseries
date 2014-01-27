@@ -20,6 +20,10 @@ msgctxt "#30000"
 msgid "General"
 msgstr "Général"
 
+msgctxt "#30003"
+msgid "Successfully loaded !"
+msgstr "Chargé avec succès !"
+
 msgctxt "#30004"
 msgid "Activate BetaSeries.com service"
 msgstr "Activer le service BetaSeries.com"
@@ -52,6 +56,22 @@ msgctxt "#30011"
 msgid "Automatically add new watched shows"
 msgstr "Ajouter automatiquement les nouvelles séries regardées"
 
+msgctxt "#30012"
+msgid "Notify on screen when marking episodes"
+msgstr "Notification visuelle lors du marquage d'un épisode"
+
+msgctxt "#30013"
+msgid "Show added : "
+msgstr "Série ajoutée : "
+
+msgctxt "#30014"
+msgid "Episode marked as watched !"
+msgstr "Episode marqué comme vu !"
+
+msgctxt "#30015"
+msgid "Episode marked as not watched !"
+msgstr "Episode marqué comme non vu !"
+
 msgctxt "#32001"
 msgid "Authentication error"
 msgstr "Erreur d'authentification"
@@ -59,3 +79,19 @@ msgstr "Erreur d'authentification"
 msgctxt "#32002"
 msgid "Please update the add-on"
 msgstr "Veuillez mettre à jour l'extension"
+
+msgctxt "#32003"
+msgid "Failed to connect to the site"
+msgstr "Erreur lors de la connexion au site"
+
+msgctxt "#32004"
+msgid "Login or password incorrect"
+msgstr "Identifiant ou mot de passe incorrect"
+
+msgctxt "#32005"
+msgid "Failed to add show : "
+msgstr "Erreur lors de l'ajout de la série : "
+
+msgctxt "#32006"
+msgid "Failed to mark episode !"
+msgstr "Erreur lors du marquage de l'épisode !"

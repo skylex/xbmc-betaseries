@@ -20,7 +20,11 @@ msgctxt "#30000"
 msgid "General"
 msgstr ""
 
-#empty strings from id 30001 to 30003
+#empty strings from id 30001 to 30002
+
+msgctxt "#30003"
+msgid "Successfully loaded !"
+msgstr ""
 
 msgctxt "#30004"
 msgid "Activate BetaSeries.com service"
@@ -54,7 +58,23 @@ msgctxt "#30011"
 msgid "Automatically add new watched shows"
 msgstr ""
 
-#empty strings from id 30012 to 32000
+msgctxt "#30012"
+msgid "Notify on screen when marking episodes"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Show added : "
+msgstr ""
+
+msgctxt "#30014"
+msgid "Episode marked as watched !"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Episode marked as not watched !"
+msgstr ""
+
+#empty strings from id 30016 to 32000
 
 msgctxt "#32001"
 msgid "Authentication error"
@@ -62,4 +82,20 @@ msgstr ""
 
 msgctxt "#32002"
 msgid "Please update the add-on"
+msgstr ""
+
+msgctxt "#32003"
+msgid "Failed to connect to the site"
+msgstr ""
+
+msgctxt "#32004"
+msgid "Login or password incorrect"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Failed to add show : "
+msgstr ""
+
+msgctxt "#32006"
+msgid "Failed to mark episode !"
 msgstr ""
