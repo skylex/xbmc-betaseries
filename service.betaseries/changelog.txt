@@ -1,3 +1,6 @@
+1.0.2
+- fix notification icon
+
 1.0.1
 - bug fixes, new notification option, code cleanup
 
