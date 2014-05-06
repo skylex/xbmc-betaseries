@@ -32,7 +32,7 @@
 	</extension>
 </addon>
 
-<addon id="service.subtitles.betaseries" name="Betaseries" version="0.1" provider-name="fdonv">
+<addon id="service.subtitles.betaseries" name="Betaseries" version="0.2" provider-name="fdonv">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 	</requires>
