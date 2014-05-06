@@ -145,7 +145,7 @@ if params['action'] == 'search':
 				french = 1
 			if 'eng' in item['3let_language']: 
 				english = 1
-			if ((french > 0 and english > 0) or (french == 0 and anglish == 0)):
+			if ((french > 0 and english > 0) or (french == 0 and english == 0)):
 				searchsuburl = 'http://' + apiurl + '/subtitles/show/' + url + '.xml?season=' + item['season'] + '&episode=' + item['episode'] + '&language=VOVF' + '&key=' + apikey
 			elif (french > 0 and english == 0):
 				searchsuburl = 'http://' + apiurl + '/subtitles/show/' + url + '.xml?season=' + item['season'] + '&episode=' + item['episode'] + '&language=VF' + '&key=' + apikey
