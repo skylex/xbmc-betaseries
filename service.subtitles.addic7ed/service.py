@@ -2,15 +2,17 @@
 
 import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
-from BeautifulSoup import BeautifulSoup
 
 __addon__       =    xbmcaddon.Addon()
 __language__    =    __addon__.getLocalizedString
 __scriptid__    =    __addon__.getAddonInfo('id')
+__icon__        = __addon__.getAddonInfo('icon')
 __profile__     =    xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
 __temp__        =    xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
 
-_ = sys.modules[ "__main__" ].__language__
+# _ = sys.modules[ "__main__" ].__language__
+sys.path.append( os.path.join( __profile__, "lib") )
+from BeautifulSoup import BeautifulSoup
 
 self_debug = True
 self_host = "http://www.addic7ed.com"
@@ -43,10 +45,10 @@ def languageTranslate(lang, lang_from, lang_to):
 def normalizeString(str):
     return unicodedata.normalize('NFKD', unicode(unicode(str, 'utf-8'))).encode('ascii','ignore')
 
-def log(txt):
+def log(txt, level=xbmc.LOGDEBUG):
     if self_debug:
         message = u'%s: %s' % (__scriptid__, txt)
-        xbmc.log(msg=message, level=xbmc.LOGDEBUG)
+        xbmc.log(msg=message, level=level)
 
 def get_params(string=""):
   param=[]
@@ -69,49 +71,83 @@ def get_params(string=""):
                                 
   return param
 
-def get_url(url, referer):
+def get_url(url, referer=self_host):
     req_headers = {
     'User-Agent': self_user_agent,
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'Pragma': 'no-cache',
     'Referer': referer}
     request = urllib2.Request(url, headers=req_headers)
     opener = urllib2.build_opener()
-    response = opener.open(request)
+    try:
+        response = opener.open(request)
+        contents = response.read()
+        return contents
+    except urllib2.HTTPError, e:
+        log('HTTPError = ' + str(e.code), xbmc.LOGERROR)
+    except urllib2.URLError, e:
+        log('URLError = ' + str(e.reason), xbmc.LOGERROR)
+    except httplib.HTTPException, e:
+        log('HTTPException', xbmc.LOGERROR)
+    except Exception:
+        import traceback
+        log('generic exception: ' + traceback.format_exc(), xbmc.LOGERROR)
+    # when error occured
+    xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % ('Addic7ed', 'HTTP error. see log file', 1000, __icon__)).encode('utf-8', 'ignore'))
+    return False
 
-    contents = response.read() 
-    return contents    
-
-def download_subtitle(url, referer=self_host):
+def download_subtitle(url, referer):
     file = os.path.join(__temp__, "adic7ed.srt")
     log("dowloading url : %s" % (url))
-    f = get_url(url, referer)
-    local_file_handle = open(file, "w" + "b")
-    local_file_handle.write(f)
-    local_file_handle.close() 
-    return file
+    socket.setdefaulttimeout(15)
+    content = get_url(url, referer)
+    if content:
+        local_file_handle = open(file, "w" + "b")
+        local_file_handle.write(content)
+        local_file_handle.close()
+        return file
+    else:
+        return False
 
 def search_subtitles(**search):
     subtitles = []
     log("Entering search_subtitles()")
-
     # replace some characters
-    name = search['name'].lower().replace(" ", "_").replace("'","")
+    name = search['name'].lower().replace(" ", "_")
     log("after name = %s" % (name))
-
     # if it is a tvshow
     if search['video'] == "tvshow":
         # replace chars for "$#*! My Dad Says"
         name = name.replace("$#*!","shit")
-        searchurl = "%s/serie/%s/%s/%s/addic7ed" %(self_host, name, search['season'], search['episode'])
+        # replace chars for "That '70s Show'
+        name = name.replace("That '70s","That 70s")
+        # remove year
+        name2 = re.sub("_\(.*\)$","", name)
+        log("after name2 = %s" % (name2))
+        # set search url
+        searchurl = "%s/serie/%s/%s/%s/addic7ed" %(self_host, urllib.quote(name), search['season'], search['episode'])
+        searchurl2 = "%s/serie/%s/%s/%s/addic7ed" %(self_host, urllib.quote(name2), search['season'], search['episode'])
     else:
-        searchurl = "%s/film/%s_(%s)-Download" %(self_host, name, str(search['year']))
-
+        searchurl = "%s/film/%s_(%s)-Download" %(self_host, urllib.quote(name), str(search['year']))
     # get searchurl
-    socket.setdefaulttimeout(3)
-    page = urllib2.urlopen(searchurl)
-    content = page.read()
-    content = content.replace("The safer, easier way", "The safer, easier way \" />")
-    soup = BeautifulSoup(content)
-
+    log("search url = %s" % (searchurl))
+    socket.setdefaulttimeout(10)
+    content = get_url(searchurl)
+    # or search without year
+    if not content and search['video'] == "tvshow":
+        searchurl = searchurl2
+        log("trying without year, url = %s" % (searchurl))
+        content = get_url(searchurl)
+    if not content:
+        log("no data, cannot continue")
+        return False
+    # analyse content
+    try:
+        content = content.replace("The safer, easier way", "The safer, easier way \" />")
+        soup = BeautifulSoup(content)
+    except:
+        log("badly formatted content")
+        return False
     # for each release version
     log("parsing soup after urlopen")
     log("--------------------------")
@@ -174,7 +210,7 @@ def search_subtitles(**search):
                 status = html_status.find("b").string.strip()
                 log("after status = '%s'" % (status))
                 # get link
-                link = "%s%s" % (self_host, html_status.findNext("td").find("a")["href"])
+                link = str("%s%s" % (self_host, html_status.findNext("td").find("a")["href"]))
                 log("after link = %s" % (link))
                 # get corrected / CC
                 html_imgs = html_status.findNext("td", {"class" : "newsDate", "colspan" : "2"})
@@ -232,7 +268,9 @@ def search_subtitles(**search):
             # adding item to GUI list
             url = "plugin://%s/?action=download&link=%s&filename=%s&searchurl=%s" % (__scriptid__, item["link"], item["filename"], searchurl)
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
-        log("End of search_subtitles()")
+    else:
+        log("nothing found")
+    log("End of search_subtitles()")
 
 # start script
 params = get_params()
@@ -268,8 +306,9 @@ if params['action'] == 'search':
 elif params['action'] == 'download':
     # download link
     sub = download_subtitle(params["link"], params["searchurl"])
-    # xbmc handles moving and using the subtitle
-    listitem = xbmcgui.ListItem(label=sub)
-    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=sub,listitem=listitem,isFolder=False)
+    if sub:
+        # xbmc handles moving and using the subtitle
+        listitem = xbmcgui.ListItem(label=sub)
+        xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=sub,listitem=listitem,isFolder=False)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
