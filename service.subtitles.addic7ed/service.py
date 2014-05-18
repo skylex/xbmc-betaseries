@@ -10,11 +10,9 @@ __icon__        = __addon__.getAddonInfo('icon')
 __profile__     =    xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
 __temp__        =    xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
 
-# _ = sys.modules[ "__main__" ].__language__
 sys.path.append( os.path.join( __profile__, "lib") )
 from BeautifulSoup import BeautifulSoup
 
-self_debug = True
 self_host = "http://www.addic7ed.com"
 self_user_agent = "Mozilla/5.0 (X11; Linux i686; rv:29.0) Gecko/20100101 Firefox/29.0"
 self_release_pattern = re.compile("Version (.+), ([0-9]+).([0-9])+ MBs.*")
@@ -24,31 +22,29 @@ if xbmcvfs.exists(__temp__):
   shutil.rmtree(__temp__)
 xbmcvfs.mkdirs(__temp__)
 
-LANGUAGES = (
-    # Full name[0]  Full addic7ed name[1]
-    ("Spanish",     "Spanish (Spain)"),
-    ("Spanish",     "Spanish (Latin America)"),
-    ("Portuguese",  "Portuguese (Brazilian)"),
-    ("Chinese",     "Chinese (Traditional)"),
-    ("Serbian",     "Serbian (Latin)"),
-    ("Serbian",     "Serbian (Cyrillic)"),
-    ("Chinese",     "Chinese (Simplified)"))
+TEAMS = (
+    # SD[0]              HD[1]
+    ("lol|sys|dim",      "dimension"),
+    ("asap|xii|fqm|imm", "immerse|orenji"),
+    ("excellence",       "remarkable"),
+    ("2hd|xor",          "ctu"),
+    ("tla",              "bia"))
 
-def languageTranslate(lang, lang_from, lang_to):
-    # translate using LANGUAGES table
-    for x in LANGUAGES:
-        if lang == x[lang_from]:
-            return x[lang_to]
-    # return lang if not found
-    return lang
+def other_team(team, team_from, team_to):
+    # get other team using TEAMS table
+    for x in TEAMS:
+        if len(re.findall(x[team_from], team)) > 0:
+            return x[team_to]
+    # return team if not found
+    log("other team not found")
+    return team
 
-def normalizeString(str):
+def normalize_string(str):
     return unicodedata.normalize('NFKD', unicode(unicode(str, 'utf-8'))).encode('ascii','ignore')
 
 def log(txt, level=xbmc.LOGDEBUG):
-    if self_debug:
-        message = u'%s: %s' % (__scriptid__, txt)
-        xbmc.log(msg=message, level=level)
+    message = u'%s: %s' % (__scriptid__, txt)
+    xbmc.log(msg=message, level=level)
 
 def get_params(string=""):
   param=[]
@@ -109,20 +105,42 @@ def download_subtitle(url, referer):
     else:
         return False
 
+def get_soup(content):
+    # check if page content can be used
+    pattern = "subtitles from the source! - Addic7ed.com"
+    try:
+        soup = BeautifulSoup(content)
+        title = str(soup.findAll("title")[0])
+        if title.find(pattern) > -1:
+            return soup
+        else:
+            log("bad page, maybe index after 404")
+            return False
+    except:
+        log("badly formatted content")
+        return False
+
 def search_subtitles(**search):
     subtitles = []
     log("Entering search_subtitles()")
+    # get video file name
+    filename = os.path.basename(search['path']).lower()
+    # remove file extension
+    filename = re.sub("\.[^.]+$", "", filename)
+    log("after filename = %s" % (filename))
     # replace some characters
-    name = search['name'].lower().replace(" ", "_")
+    name = search['name'].strip().lower().replace(" ", "_")
     log("after name = %s" % (name))
     # if it is a tvshow
     if search['video'] == "tvshow":
         # replace chars for "$#*! My Dad Says"
         name = name.replace("$#*!","shit")
-        # replace chars for "That '70s Show'
-        name = name.replace("That '70s","That 70s")
+        # remove apostrophe for "That '70s Show'
+        name = name.replace("'70s","70s")
+        # remove ending dot for "Awkward."
+        name = name.replace("awkward.","awkward")
         # remove year
-        name2 = re.sub("_\(.*\)$","", name)
+        name2 = re.sub("_\(.*\)$", "", name)
         log("after name2 = %s" % (name2))
         # set search url
         searchurl = "%s/serie/%s/%s/%s/addic7ed" %(self_host, urllib.quote(name), search['season'], search['episode'])
@@ -133,38 +151,34 @@ def search_subtitles(**search):
     log("search url = %s" % (searchurl))
     socket.setdefaulttimeout(10)
     content = get_url(searchurl)
+    soup = get_soup(content)
     # or search without year
-    if not content and search['video'] == "tvshow":
+    if search['video'] == "tvshow" and not soup:
         searchurl = searchurl2
-        log("trying without year, url = %s" % (searchurl))
+        log("trying without year/country, url = %s" % (searchurl))
         content = get_url(searchurl)
-    if not content:
+        soup = get_soup(content)
+    if not soup:
         log("no data, cannot continue")
-        return False
-    # analyse content
-    try:
-        content = content.replace("The safer, easier way", "The safer, easier way \" />")
-        soup = BeautifulSoup(content)
-    except:
-        log("badly formatted content")
         return False
     # for each release version
     log("parsing soup after urlopen")
     log("--------------------------")
-    for html_tables in soup("table", {"class":  "tabel95", "align" : "center"}):
+    for html_tables in soup.findAll("table", {"class":  "tabel95", "align" : "center"}):
         # get version td
         html_version = html_tables.findNext("td", {"class":  "NewsTitle", "colspan" : "3"})
         subversion = self_release_pattern.match(str(html_version.contents[1])).groups()[0]
+        subversion = str(subversion).strip().replace(" ", "-").replace("--", "-")
         # for each lang of this version
         for html_lang in html_tables.findAll("td", {"class" : "language"}):
             try:
                 log("subtitle version = %s" % (subversion))
                 # get language name
-                lang = str(html_lang).split('class="language">')[1].split('<a')[0].replace("\n","")
+                lang = str(html_lang.contents[0]).strip()
                 log("subtitle lang = %s" % (lang))
                 try:
                     # normalize language name
-                    lang = languageTranslate(lang,1,0)
+                    lang = re.sub(" \(.*\)", "", lang)
                     # get language codes (2 letters)
                     lang2 = xbmc.convertLanguage(lang, xbmc.ISO_639_1)
                     # if lang = user gui language
@@ -178,28 +192,16 @@ def search_subtitles(**search):
                     log("unsupported language")
                     break
                 # get team name (everything after "-")
-                subteam = self_team_pattern.match(str("-" + subversion)).groups()[0].lower()
+                subteam = str(self_team_pattern.match("-" + subversion).groups()[0]).lower()
                 log("after subteam = %s" % (subteam))
-                # find 720p equivalent team if exists
-                try:
-                    subteamhd = {
-                        "lol": "dimension",
-                        "sys": "dimension",
-                        "dim": "dimension",
-                        "asap": "immerse",
-                        "xii": "immerse",
-                        "imm": "immerse",
-                        "excellence": "remarkable",
-                        "tla": "bia"
-                    }[subteam]
-                except:
-                	subteamhd = subteam
-                log("after subteamhd = %s" % (subteamhd))
-                # get video file name
-                filename = os.path.basename(search['path']).lower() 
-                log("after filename = %s" % (filename))
+                # find HD equivalent team if exists (or SD equivalent)
+                if filename.find("720p") > -1:
+                    subteam2 = other_team(subteam,0,1)
+                else:
+                    subteam2 = other_team(subteam,1,0)
+                log("after subteam2 = %s" % (subteam2))
                 # if team corresponds
-                if filename.find(str("-" + subteam)) > -1 or (filename.find(str("-" + subteamhd))) > -1:
+                if len(re.findall("-(" + subteam + "|" + subteam2 + ")$", filename)) > 0:
                     # set sync tag
                     sync = True
                 else:
@@ -224,39 +226,45 @@ def search_subtitles(**search):
                     elif html_img['title'] == "Hearing Impaired":
                         cc = True
                 log("after corrected = %s, cc = %s" % (corrected, cc))
-                # set rating
+                # set note
                 if status == "Completed":
                     if corrected:
-                        rating = '5'
+                        note = '1'
                     else:
-                        rating = '3'
+                        note = '2'
                 else:
-                    rating = '0'
-                log("after rating = %s" % (rating))
+                    note = '3'
+                log("after note = %s" % (note))
                 # if language allowed by user
                 if lang2 in search['langs']:
                     # format subtitle name for GUI list
                     if search['video'] == "tvshow":
-                        subname = "%s.S%.2dE%.2d-%s" %(name.replace("_", ".").title(), int(search['season']), int(search['episode']), subversion)
+                        subname = "%s.S%.2dE%.2d" %(name.replace("_", ".").title(), int(search['season']), int(search['episode']))
+                        # add version name
+                        if subversion.find("-") > -1:
+                            subname = "%s.%s" % (subname, subversion)
+                        else:
+                            subname = "%s-%s" % (subname, subversion)
                     else:
                         subname = "%s-%s" %(name.replace("_", ".").title(), subversion)
                     # add subtitle to list
-                    subtitles.append({'order':order,'filename':subname,'link':link,'lang':lang,'lang2':lang2,"cc":cc,"sync":sync,"rating":rating})
+                    subtitles.append({'order':order,'filename':subname,'link':link,'lang':lang,'lang2':lang2,"cc":cc,"sync":sync,"note":note})
                     log("subtitle added : %s" % (subname))
                 log("--------------------------")
             except:
                 log("Error in search_subtitles!")
-                if self_debug:
-                    raise
-                else:
-                    pass
+                raise
     if subtitles:
-        # sort : sync, ui lang, other langs, filename, rating
-        subtitles.sort(key=lambda x: [ x['rating']], reverse=True)
-        subtitles.sort(key=lambda x: [not x['sync'], x['order'], x['lang'], x['filename']])
+        subtitles.sort(key=lambda x: [not x['sync'], x['order'], x['lang'], x['note'], x['filename']])
         log("sorted subtitles = %s" % (subtitles))
         # for each subtitle
         for item in subtitles:
+            # set rating
+            item["rating"] = {
+                "1": "5",
+                "2": "3",
+                "3": "0"
+            }[item["note"]]
             # xbmc list item format
             listitem = xbmcgui.ListItem(label=item["lang"],
               label2=item["filename"],
@@ -281,8 +289,8 @@ if params['action'] == 'search':
     item['year']    = xbmc.getInfoLabel("VideoPlayer.Year")
     item['season']  = str(xbmc.getInfoLabel("VideoPlayer.Season"))
     item['episode'] = str(xbmc.getInfoLabel("VideoPlayer.Episode"))
-    item['tvshow']  = normalizeString(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))
-    item['title']   = normalizeString(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))
+    item['tvshow']  = normalize_string(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))
+    item['title']   = normalize_string(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))
     item['path']    = urllib.unquote(xbmc.Player().getPlayingFile().decode('utf-8'))
     item['uilang']  = str(xbmc.getLanguage())
     item['langs']   = []

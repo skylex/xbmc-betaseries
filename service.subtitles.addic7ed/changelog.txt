@@ -1,3 +1,6 @@
+1.0.2
+- major corrections and optimizations
+
 1.0.1
 - minor corrections
 
