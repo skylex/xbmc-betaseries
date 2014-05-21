@@ -3,12 +3,13 @@
 import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
 
-__addon__       =    xbmcaddon.Addon()
-__language__    =    __addon__.getLocalizedString
-__scriptid__    =    __addon__.getAddonInfo('id')
-__icon__        = __addon__.getAddonInfo('icon')
-__profile__     =    xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
-__temp__        =    xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
+__addon__        = xbmcaddon.Addon()
+__addonid__      = __addon__.getAddonInfo('id')
+__addonname__    = __addon__.getAddonInfo('name')
+__icon__         = __addon__.getAddonInfo('icon')
+__language__     = __addon__.getLocalizedString
+__profile__      = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
+__temp__         = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
 
 sys.path.append( os.path.join( __profile__, "lib") )
 from BeautifulSoup import BeautifulSoup
@@ -17,6 +18,7 @@ self_host = "http://www.addic7ed.com"
 self_user_agent = "Mozilla/5.0 (X11; Linux i686; rv:29.0) Gecko/20100101 Firefox/29.0"
 self_release_pattern = re.compile("Version (.+), ([0-9]+).([0-9])+ MBs.*")
 self_team_pattern = re.compile(".*-([^-]+)$")
+self_notify = __addon__.getSetting('notify') == 'true'
 
 if xbmcvfs.exists(__temp__):
   shutil.rmtree(__temp__)
@@ -43,7 +45,7 @@ def normalize_string(str):
     return unicodedata.normalize('NFKD', unicode(unicode(str, 'utf-8'))).encode('ascii','ignore')
 
 def log(txt, level=xbmc.LOGDEBUG):
-    message = u'%s: %s' % (__scriptid__, txt)
+    message = u'%s: %s' % (__addonid__, txt)
     xbmc.log(msg=message, level=level)
 
 def get_params(string=""):
@@ -89,7 +91,8 @@ def get_url(url, referer=self_host):
         import traceback
         log('generic exception: ' + traceback.format_exc(), xbmc.LOGERROR)
     # when error occured
-    xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % ('Addic7ed', 'HTTP error. see log file', 1000, __icon__)).encode('utf-8', 'ignore'))
+    if self_notify:
+        xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30008), 750, __icon__)).encode('utf-8', 'ignore'))
     return False
 
 def download_subtitle(url, referer):
@@ -118,18 +121,24 @@ def get_soup(content):
             return False
     except:
         log("badly formatted content")
+        if self_notify:
+            xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30009), 750, __icon__)).encode('utf-8', 'ignore'))
         return False
 
 def search_subtitles(**search):
     subtitles = []
     log("Entering search_subtitles()")
     # get video file name
-    filename = os.path.basename(search['path']).lower()
-    # remove file extension
-    filename = re.sub("\.[^.]+$", "", filename)
+    dirsync = __addon__.getSetting('dirsync') == 'true'
+    if dirsync:
+        filename = os.path.basename(os.path.dirname(search['path'])).lower()
+    else:
+        filename = os.path.basename(search['path']).lower()
+        # remove file extension
+        filename = re.sub("\.[^.]+$", "", filename)
     log("after filename = %s" % (filename))
     # replace some characters
-    name = search['name'].strip().lower().replace(" ", "_")
+    name = re.sub("[ /]+", "_", search['name'].strip().lower())
     log("after name = %s" % (name))
     # if it is a tvshow
     if search['video'] == "tvshow":
@@ -255,7 +264,20 @@ def search_subtitles(**search):
                 log("Error in search_subtitles!")
                 raise
     if subtitles:
-        subtitles.sort(key=lambda x: [not x['sync'], x['order'], x['lang'], x['note'], x['filename']])
+        # get settings for order
+        uifirst = __addon__.getSetting('uifirst') == 'true'
+        ccfirst = __addon__.getSetting('ccfirst') == 'true'
+        # order accordingly
+        if uifirst:
+            if ccfirst:
+                subtitles.sort(key=lambda x: [not x['sync'], x['order'], not x['cc'], x['lang'], x['note'], x['filename']])
+            else:
+                subtitles.sort(key=lambda x: [not x['sync'], x['order'], x['lang'], x['note'], x['cc'], x['filename']])
+        else:
+            if ccfirst:
+                subtitles.sort(key=lambda x: [not x['sync'], not x['cc'], x['lang'], x['note'], x['filename']])
+            else:
+                subtitles.sort(key=lambda x: [not x['sync'], x['lang'], x['note'], x['cc'], x['filename']])
         log("sorted subtitles = %s" % (subtitles))
         # for each subtitle
         for item in subtitles:
@@ -274,9 +296,11 @@ def search_subtitles(**search):
             listitem.setProperty("sync", 'true' if item["sync"] else 'false')
             listitem.setProperty("hearing_imp", 'true' if item["cc"] else 'false')
             # adding item to GUI list
-            url = "plugin://%s/?action=download&link=%s&filename=%s&searchurl=%s" % (__scriptid__, item["link"], item["filename"], searchurl)
+            url = "plugin://%s/?action=download&link=%s&filename=%s&searchurl=%s" % (__addonid__, item["link"], item["filename"], searchurl)
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
     else:
+        if self_notify:
+            xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30010), 750, __icon__)).encode('utf-8', 'ignore'))
         log("nothing found")
     log("End of search_subtitles()")
 
