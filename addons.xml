@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
+<addon id="service.subtitles.tvsubtitles" name="tvsubtitles.net" version="1.0.0" provider-name="skylex">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0"/>
+		<import addon="script.module.beautifulsoup" version="3.2.1"/>
+	</requires>
+	<extension point="xbmc.subtitle.module" library="service.py" />
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<summary lang="en">tvsubtitles.net subtitles service</summary>
+		<summary lang="fr">Service de sous-titres tvsubtitles.net</summary>
+		<description lang="en">Search and download subtitles from tvsubtitles.net</description>
+		<description lang="fr">Rechercher et télécharger des sous-titres depuis tvsubtitles.net</description>
+	</extension>
+</addon>
+
 <addon id="service.subtitles.addic7ed" name="Addic7ed" version="1.0.3" provider-name="skylex">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
