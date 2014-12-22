@@ -1,2 +1,11 @@
-1.0.0
+0.1
 - initial release
+
+0.2
+- some changes
+
+1.0.0
+- complete rewriting
+
+1.0.1
+- lang fix (ignore case)

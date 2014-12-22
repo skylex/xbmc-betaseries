@@ -249,7 +249,7 @@ def search_subtitles(**search):
                     continue
                  # get file lang
                 try:
-                    langs = re.search(r"(?i)[ _.-](VF|VO|en|fr|english|french|eng|fre)[ _.-]", subversion).group(1)
+                    langs = re.search(r"(?i)[ _.-](english|french|eng|fre|en|fr|vo|vf)[ _.-]", subversion).group(1).lower()
                     log("after zip langs = %s" % (lang2))
                     lang2 = {
                         "french": 'fr',
@@ -257,12 +257,8 @@ def search_subtitles(**search):
                         "fre": 'fr',
                         "eng": 'en',
                         "fr": 'fr',
-                        "FR": 'fr',
                         "en": 'en',
-                        "EN": 'en',
-                        "VF": 'fr',
                         "vf": 'fr',
-                        "VO": 'en',
                         "vo": 'en'
                     }[langs]
                     log("after zip lang2 = %s" % (lang2))
