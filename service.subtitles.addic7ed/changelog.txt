@@ -1,3 +1,6 @@
+1.0.4
+- add missing httplib in imports
+
 1.0.3
 - add some settings and localize things
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil
+import os, sys, re, string, urllib, urllib2, httplib, socket, unicodedata, shutil
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
 
 __addon__        = xbmcaddon.Addon()
