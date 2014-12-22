@@ -14,7 +14,7 @@ __temp__         = xbmc.translatePath( os.path.join( __profile__, 'temp') ).deco
 sys.path.append( os.path.join( __profile__, "lib") )
 
 self_host = "http://api.betaseries.com"
-self_apikey = "db81cb96baf8"
+self_apikey = "5a85a0adc953"
 self_user_agent = "Mozilla/5.0 (compatible; service.xbmc.betaseries; XBMC)"
 self_team_pattern = re.compile(".*-([^-]+)$")
 self_notify = __addon__.getSetting('notify') == 'true'
@@ -161,8 +161,6 @@ def search_subtitles(**search):
     log("after filename = %s" % (filename))
     # configure socket
     socket.setdefaulttimeout(10)
-    # search files from filename
-    #listurl = "%s/episodes/scraper?file=%s&key=%s" % (self_host, filename, self_apikey)
     if search['video'] == "movie":
         return false
     elif search['video'] == "tvshow":
@@ -178,19 +176,15 @@ def search_subtitles(**search):
         # if we have tvdbid, work with ids
         if 'result' in tvdbid_result:
             tvdbid = tvdbid_result['result']['tvshowdetails']['imdbnumber']
-            # http://api.betaseries.com/shows/display?thetvdb_id=266189&key=db81cb96baf8 -> id:6197
             showurl = "%s/shows/display?thetvdb_id=%s&key=%s" % (self_host, tvdbid, self_apikey)
             showid = json.loads(get_url(showurl))["show"]["id"]
-            # https://api.betaseries.com/episodes/search?show_id=6197&number=S01E12&key=db81cb96baf8 -> id:341621
             episodeurl = "%s/episodes/search?show_id=%s&number=S%#02dE%#02d&key=%s" % (self_host, showid, int(search['season']), int(search['episode']), self_apikey)
             episodeid = json.loads(get_url(episodeurl))["episode"]["id"]
         # or scrap from filename
         else:
-            # http://api.betaseries.com/episodes/scraper?file=The.Blacklist.S01E12.BDRip.x264-DEMAND&key=db81cb96baf8 -> id:341621
             scrapurl = "%s/episodes/scraper?file=%s&key=%s" % (self_host, filename, self_apikey)
             episodeid = json.loads(get_url(scrapurl))["episode"]["id"]
         # then get subtitles
-        # http://api.betaseries.com/subtitles/episode?id=341621&key=db81cb96baf8 -> all + content: srts from zip
         listurl = "%s/subtitles/episode?id=%s&key=%s" % (self_host, episodeid, self_apikey)
     # get data
     content = get_url(listurl)
@@ -399,7 +393,6 @@ if params['action'] == 'search':
         search_subtitles(video="tvshow", name=item['tvshow'], season=item['season'], episode=item['episode'], path=item['path'], langs=item['langs'], uilang=item['uilang'])
     elif item['year'] != "":
         exit
-        #search_subtitles(video="movie", name=item['title'], year=item['year'], path=item['path'], langs=item['langs'], uilang=item['uilang'])
     else:
         search_subtitles(video="tvshow", path=item['path'], langs=item['langs'], uilang=item['uilang'])
 
