@@ -1,75 +1,60 @@
-# -*- coding: utf-8 -*- 
-#
-# fdonv based (almost copied) on amet source code.
-#
-# next :
-# - add sync icon based on rlz group (lol = dimension etc.)
-# - check the sort version to priorize french in the top of the list
+# -*- coding: utf-8 -*-
 
-import sys
-import os
-import re
-import time
-import urllib
-import urllib2
-import xbmc
-import xbmcgui
-import string
-import shutil
-from xml.dom import minidom
-import xbmcaddon
-import os.path
-import xbmcvfs
-import xbmcplugin
-import unicodedata
-import simplejson as json
+import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil, time
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs, json
 
-__addon__ 		=	xbmcaddon.Addon()
-__language__	=	__addon__.getLocalizedString
-__scriptid__	=	__addon__.getAddonInfo('id')
-__profile__		=	xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
-__temp__		=	xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
+__addon__        = xbmcaddon.Addon()
+__addonid__      = __addon__.getAddonInfo('id')
+__addonname__    = __addon__.getAddonInfo('name')
+__icon__         = __addon__.getAddonInfo('icon')
+__language__     = __addon__.getLocalizedString
+__profile__      = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
+__temp__         = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
 
-user_agent = 'Mozilla/5.0 (compatible; XBMC.Subtitle; XBMC)'
+sys.path.append( os.path.join( __profile__, "lib") )
 
-apikey = 'db81cb96baf8'
-apiurl = 'api.betaseries.com'
+self_host = "http://api.betaseries.com"
+self_apikey = "db81cb96baf8"
+self_user_agent = "Mozilla/5.0 (compatible; service.xbmc.betaseries; XBMC)"
+self_team_pattern = re.compile(".*-([^-]+)$")
+self_notify = __addon__.getSetting('notify') == 'true'
 
-if not xbmcvfs.exists(__temp__):
-	xbmcvfs.mkdirs(__temp__)
+TEAMS = (
+    # SD[0]              HD[1]
+    ("lol|sys|dim",      "dimension"),
+    ("asap|xii|fqm|imm", "immerse|orenji"),
+    ("excellence",       "remarkable"),
+    ("2hd|xor",          "ctu"),
+    ("tla",              "bia"))
 
-LANGUAGES      = (
-    # Full Language name[0]     podnapisi[1]  ISO 639-1[2]   ISO 639-1 Code[3]   Script Setting Language[4]   localized name id number[5]
-    ("English"                    , "2",        "en",            "eng",                 "11",                    30212  ),
-    ("French"                     , "8",        "fr",            "fre",                 "15",                    30215  ))
+LANGUAGES = (
+    # [0]  [1]
+    ("br", "pt"),
+    ("gr", "el"))
 
-def normalizeString(str):
-  return unicodedata.normalize('NFKD', unicode(unicode(str, 'utf-8'))).encode('ascii','ignore')
+def other_team(team, team_from, team_to):
+    # get other team using TEAMS table
+    for x in TEAMS:
+        if len(re.findall(x[team_from], team)) > 0:
+            return x[team_to]
+    # return team if not found
+    log("other team not found")
+    return team
 
-def get_languages(languages):
-	if languages == 'VF':
-		code = 'fr'
-	if languages == 'VO':
-		code = 'en'
-	if languages == 'VOVF':
-		code = 'fr'
-	return code 
+def normalize_lang(lang, lang_from, lang_to):
+    # normalize lang using LANGUAGES table
+    for x in LANGUAGES:
+        if len(re.findall(x[lang_from], lang)) > 0:
+            return x[lang_to]
+    # return lang if not found
+    return lang
 
-def languageTranslate(lang, lang_from, lang_to):
-  for x in LANGUAGES:
-    if lang == x[lang_from] :
-      return x[lang_to]
-	
-def getShowId():
-    try:
-      playerid_query = '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}'
-      playerid = json.loads(xbmc.executeJSONRPC(playerid_query))['result'][0]['playerid']
-      tvshowid_query = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": {"playerid": ' + str(playerid) + ', "properties": ["tvshowid"]}, "id": 1}'
-      tvshowid = json.loads(xbmc.executeJSONRPC (tvshowid_query))['result']['item']['tvshowid']
-      tvdbid_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshowid) + ', "properties": ["imdbnumber"]}, "id": 1}'
-      return json.loads(xbmc.executeJSONRPC (tvdbid_query))['result']['tvshowdetails']['imdbnumber']
-    except:
-      print "[SCRIPT] [EXCEPTION] BETASERIESSUBTITLES - no show id found"
+def normalize_string(str):
+    return unicodedata.normalize('NFKD', unicode(unicode(str, 'utf-8'))).encode('ascii','ignore')
+
+def log(txt, level=xbmc.LOGDEBUG):
+    message = u'%s: %s' % (__addonid__, txt)
+    xbmc.log(msg=message, level=level)
 
 def get_params(string=""):
   param=[]
@@ -92,284 +77,339 @@ def get_params(string=""):
                                 
   return param
 
+def get_url(url, referer=self_host):
+    req_headers = {
+    'User-Agent': self_user_agent,
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'Pragma': 'no-cache',
+    'Referer': referer}
+    request = urllib2.Request(url, headers=req_headers)
+    opener = urllib2.build_opener()
+    try:
+        response = opener.open(request)
+        contents = response.read()
+        return contents
+    except urllib2.HTTPError, e:
+        log('HTTPError = ' + str(e.code), xbmc.LOGERROR)
+    except urllib2.URLError, e:
+        log('URLError = ' + str(e.reason), xbmc.LOGERROR)
+    except httplib.HTTPException, e:
+        log('HTTPException', xbmc.LOGERROR)
+    except Exception:
+        import traceback
+        log('generic exception: ' + traceback.format_exc(), xbmc.LOGERROR)
+    # when error occured
+    if self_notify:
+        xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30008), 750, __icon__)).encode('utf-8', 'ignore'))
+    return False
+
+def download_subtitle(url, ext, subversion, referer):
+    # name of temp file for download
+    local_tmp_file = os.path.join(__temp__, "betaseries." + ext)
+    log("downloading url : %s" % (url))
+    socket.setdefaulttimeout(15)
+    content = get_url(url, referer)
+    if content:
+        local_file_handle = open(local_tmp_file, "w" + "b")
+        local_file_handle.write(content)
+        local_file_handle.close()
+        log("file extension is : %s" % (ext))
+        if ext in ['zip','rar']:
+            files = os.listdir(__temp__)
+            init_filecount = len(files)
+            log("number of files : %s" % (init_filecount))
+            filecount = init_filecount
+            log("extracting zip file : %s" % (local_tmp_file))
+            xbmc.executebuiltin("XBMC.Extract(" + local_tmp_file + "," + __temp__ +")")
+            waittime  = 0
+            while (filecount == init_filecount) and (waittime < 20): # nothing yet extracted
+                time.sleep(1)  # wait 1 second to let the builtin function 'XBMC.extract' unpack
+                files = os.listdir(__temp__)
+                filecount = len(files)
+                waittime = waittime + 1
+            # if max waittime reached
+            if waittime == 20:
+                log("error unpacking files in : %s" % (__temp__))
+            else:
+                log("unpacked files in : %s" % (__temp__))
+                time.sleep(1)
+                files = os.listdir(__temp__)
+                log("looking for %s" % (subversion))
+                for filename in files:
+                    log("checking file %s" % (filename))
+                    if str(filename) == str(subversion):
+                        file = str(os.path.normpath(os.path.join(__temp__, filename)))
+                        log("selected file : %s" % (filename))
+                        return file
+        else:
+            log("selected file : %s" % (subversion))
+            return local_tmp_file
+    else:
+        return False
+
+def search_subtitles(**search):
+    subtitles = []
+    log("Entering search_subtitles()")
+    # get video file name
+    dirsync = __addon__.getSetting('dirsync') == 'true'
+    if dirsync:
+        filename = os.path.basename(os.path.dirname(search['path'])).lower()
+    else:
+        filename = os.path.basename(search['path']).lower()
+        # remove file extension
+        filename = re.sub("\.[^.]+$", "", filename)
+    log("after filename = %s" % (filename))
+    # configure socket
+    socket.setdefaulttimeout(10)
+    # search files from filename
+    #listurl = "%s/episodes/scraper?file=%s&key=%s" % (self_host, filename, self_apikey)
+    if search['video'] == "movie":
+        return false
+    elif search['video'] == "tvshow":
+        # get playerid
+        playerid_query = '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}'
+        playerid = json.loads(xbmc.executeJSONRPC(playerid_query))['result'][0]['playerid']
+        # get tvshowid
+        tvshowid_query = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": {"playerid": ' + str(playerid) + ', "properties": ["tvshowid"]}, "id": 1}'
+        tvshowid = json.loads(xbmc.executeJSONRPC (tvshowid_query))['result']['item']['tvshowid']
+        # get tvdbid
+        tvdbid_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshowid) + ', "properties": ["imdbnumber"]}, "id": 1}'
+        tvdbid_result = json.loads(xbmc.executeJSONRPC(tvdbid_query))
+        # if we have tvdbid, work with ids
+        if 'result' in tvdbid_result:
+            tvdbid = tvdbid_result['result']['tvshowdetails']['imdbnumber']
+            # http://api.betaseries.com/shows/display?thetvdb_id=266189&key=db81cb96baf8 -> id:6197
+            showurl = "%s/shows/display?thetvdb_id=%s&key=%s" % (self_host, tvdbid, self_apikey)
+            showid = json.loads(get_url(showurl))["show"]["id"]
+            # https://api.betaseries.com/episodes/search?show_id=6197&number=S01E12&key=db81cb96baf8 -> id:341621
+            episodeurl = "%s/episodes/search?show_id=%s&number=S%#02dE%#02d&key=%s" % (self_host, showid, int(search['season']), int(search['episode']), self_apikey)
+            episodeid = json.loads(get_url(episodeurl))["episode"]["id"]
+        # or scrap from filename
+        else:
+            # http://api.betaseries.com/episodes/scraper?file=The.Blacklist.S01E12.BDRip.x264-DEMAND&key=db81cb96baf8 -> id:341621
+            scrapurl = "%s/episodes/scraper?file=%s&key=%s" % (self_host, filename, self_apikey)
+            episodeid = json.loads(get_url(scrapurl))["episode"]["id"]
+        # then get subtitles
+        # http://api.betaseries.com/subtitles/episode?id=341621&key=db81cb96baf8 -> all + content: srts from zip
+        listurl = "%s/subtitles/episode?id=%s&key=%s" % (self_host, episodeid, self_apikey)
+    # get data
+    content = get_url(listurl)
+    data = json.loads(content)["subtitles"]
+    if not data:
+        log("no data, cannot continue")
+        return False
+    # for each release version
+    log("parsing data after urlopen")
+    log("--------------------------")
+    for subtitle in data:
+        # get filename
+        subfile = str(subtitle["file"])
+        log("after subfile = %s" % (subfile))
+        # get file extension
+        ext = string.split(subfile,'.')[-1]
+        # get season number from data
+        season = int(subtitle["episode"]["season"])
+        log("after season = %s" % (season))
+        # get episode number from data
+        episode = int(subtitle["episode"]["episode"])
+        log("after episode = %s" % (episode))
+        # get names of files contained in zip file, if any
+        if len(subtitle["content"]) > 0:
+            content = subtitle["content"]
+        # or put filename in content
+        else:
+            content = [subtitle["file"]]
+        log("after content = %s" % (content))
+        log("-------------")
+        # for each file in content
+        for subversion in content:
+            # subtitle file name
+            subversion = str(subversion)
+            log("after subversion = %s" % (subversion))
+            # subtitle download url
+            link = subtitle["url"]
+            log("after link = %s" % (link))
+            # normalize lang
+            lang2 = {
+                "VO": "en",
+                "VF": "fr",
+                "VOVF": "fr",
+            }[subtitle["language"]]
+            # invert rating (needed for order later)
+            note = {
+                "1": "3",
+                "3": "2",
+                "5": "1"
+            }[str(subtitle["quality"])]
+            log("after note = %s" % (note))
+            # check if file is a subtitle
+            if not len(re.findall(r"(?i)\.(srt|ssa|ass|sub)$", subversion)):
+                log("not a subtitle : %s" % (subversion))
+                continue
+            # if from a zip file
+            if len(content) > 1:
+                # check if file is for correct season and episode
+                search_string = r"(?i)(s%#02de%#02d|%d%#02d|%dx%#02d)" % (season, episode, season, episode, season, episode)
+                if not re.search(search_string, subversion):
+                    log("file not matching episode : %s" % (subversion))
+                    continue
+                 # get file lang
+                try:
+                    langs = re.search(r"(?i)[ _.-](VF|VO|en|fr|english|french|eng|fre)[ _.-]", subversion).group(1)
+                    log("after zip langs = %s" % (lang2))
+                    lang2 = {
+                        "french": 'fr',
+                        "english": 'en',
+                        "fre": 'fr',
+                        "eng": 'en',
+                        "fr": 'fr',
+                        "FR": 'fr',
+                        "en": 'en',
+                        "EN": 'en',
+                        "VF": 'fr',
+                        "vf": 'fr',
+                        "VO": 'en',
+                        "vo": 'en'
+                    }[langs]
+                    log("after zip lang2 = %s" % (lang2))
+                except:
+                    log("unsupported language")
+                    continue
+            try:
+                # get full language name
+                lang = xbmc.convertLanguage(lang2, xbmc.ENGLISH_NAME)
+            except:
+                log("unsupported language")
+                continue
+            # if lang = user gui language
+            if lang == search['uilang']:
+                # put this file on top
+                order = 0
+            else:
+                order = 1
+            log("after lang = %s, lang2 = %s" % (lang, lang2))
+            # get subtitle team
+            subteam = str(filename).strip().replace(".","-")
+            if len(subteam) > 0:
+                # get team name (everything after "-")
+                subteam = str(self_team_pattern.match("-" + subteam).groups()[0]).lower()
+                log("after subteam = %s" % (subteam))
+                # find HD equivalent team if exists (or SD equivalent)
+                if filename.find("720p") > -1:
+                    subteam2 = other_team(subteam,0,1)
+                else:
+                    subteam2 = other_team(subteam,1,0)
+                log("after subteam2 = %s" % (subteam2))
+                # if team corresponds
+                if len(re.findall(r"(?i)[ _.-](" + subteam + "|" + subteam2 + ")[ _.-]", subversion)) > 0:
+                    # set sync tag
+                    sync = True
+                else:
+                    sync = False
+            else:
+                sync = False
+            log("after sync = %s" % (sync))
+            # check if this is for hearing impaired
+            if len(re.findall(r"(?i)\.(CC|HI)\.", re.sub(r"[ _-]", ".", subversion) )) > 0:
+                cc = True
+            else:
+                cc = False
+            # if language allowed by user
+            if lang2 in search['langs']:
+                # add subtitle to list
+                subtitles.append({'order':order,'ext':ext,'filename':subversion,'link':link,'lang':lang,'lang2':lang2,"cc":cc,"sync":sync,"note":note})
+                log("subtitle added : %s" % (subversion))
+        log("--------------------------")
+    if subtitles:
+        # get settings for order
+        uifirst = __addon__.getSetting('uifirst') == 'true'
+        ccfirst = __addon__.getSetting('ccfirst') == 'true'
+        # order accordingly
+        if uifirst:
+            if ccfirst:
+                subtitles.sort(key=lambda x: [not x['sync'], x['order'], not x['cc'], x['lang'], x['note'], x['filename']])
+            else:
+                subtitles.sort(key=lambda x: [not x['sync'], x['order'], x['lang'], x['note'], x['cc'], x['filename']])
+        else:
+            if ccfirst:
+                subtitles.sort(key=lambda x: [not x['sync'], not x['cc'], x['lang'], x['note'], x['filename']])
+            else:
+                subtitles.sort(key=lambda x: [not x['sync'], x['lang'], x['note'], x['cc'], x['filename']])
+        log("sorted subtitles = %s" % (subtitles))
+        # for each subtitle
+        for item in subtitles:
+            # set rating
+            item["rating"] = {
+                "1": "5",
+                "2": "3",
+                "3": "1"
+            }[item["note"]]
+            # xbmc list item format
+            listitem = xbmcgui.ListItem(label=item["lang"],
+              label2=item["filename"],
+              iconImage=item["rating"],
+              thumbnailImage=item["lang2"])
+            # setting sync / CC tag
+            listitem.setProperty("sync", 'true' if item["sync"] else 'false')
+            listitem.setProperty("hearing_imp", 'true' if item["cc"] else 'false')
+            # adding item to GUI list
+            url = "plugin://%s/?action=download&link=%s&ext=%s&filename=%s" % (__addonid__, item["link"], item["ext"], urllib.quote(item["filename"]))
+            xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
+    else:
+        if self_notify:
+            xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30010), 750, __icon__)).encode('utf-8', 'ignore'))
+        log("nothing found")
+    log("End of search_subtitles()")
+
+# start of script
+
+# clean up
+log("deleting temp tree")
+shutil.rmtree(__temp__)
+log("recreating temp dir")
+xbmcvfs.mkdirs(__temp__)
+
+# get params
 params = get_params()
 
+# called when user is searching for subtitles
 if params['action'] == 'search':
-	print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - search fonction called"
-	item = {}
-	item['temp']               = False
-	item['rar']                = False
-	item['year']               = xbmc.getInfoLabel("VideoPlayer.Year")
-	item['season']             = str(xbmc.getInfoLabel("VideoPlayer.Season"))
-	item['episode']            = str(xbmc.getInfoLabel("VideoPlayer.Episode"))
-	item['tvshow']             = normalizeString(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))
-	item['title']              = normalizeString(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))
-	item['file_original_path'] = urllib.unquote(xbmc.Player().getPlayingFile().decode('utf-8'))
-	item['3let_language']      = []
-	
-	for lang in urllib.unquote(params['languages']).decode('utf-8').split(","):
-		item['3let_language'].append(xbmc.convertLanguage(lang,xbmc.ISO_639_2))
-		print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - 3let_lang : '%s'" % (item['3let_language'])
+    item = {}
+    item['year']    = xbmc.getInfoLabel("VideoPlayer.Year")
+    item['season']  = xbmc.getInfoLabel("VideoPlayer.Season")
+    item['episode'] = xbmc.getInfoLabel("VideoPlayer.Episode")
+    item['tvshow']  = normalize_string(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))
+    item['title']   = normalize_string(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))
+    item['path']    = urllib.unquote(xbmc.Player().getPlayingFile().decode('utf-8'))
+    item['uilang']  = str(xbmc.getLanguage())
+    item['langs']   = []
+    # get user preferred languages for subtitles
+    for lang in urllib.unquote(params['languages']).decode('utf-8').split(","):
+        item['langs'].append(xbmc.convertLanguage(lang, xbmc.ISO_639_1))
+    log("user langs = %s" % (item['langs']))
+    # remove rar:// or stack://
+    if ( item['path'].find("rar://") > -1 ):
+        item['path'] = os.path.dirname(item['path'][6:])
+    elif ( item['path'].find("stack://") > -1 ):
+        stackPath = item['path'].split(" , ")
+        item['path'] = stackPath[0][8:]
+    # call search_subtitles()
+    log("item = %s" % (item))
+    if item['tvshow'] != "":
+        search_subtitles(video="tvshow", name=item['tvshow'], season=item['season'], episode=item['episode'], path=item['path'], langs=item['langs'], uilang=item['uilang'])
+    elif item['year'] != "":
+        exit
+        #search_subtitles(video="movie", name=item['title'], year=item['year'], path=item['path'], langs=item['langs'], uilang=item['uilang'])
+    else:
+        search_subtitles(video="tvshow", path=item['path'], langs=item['langs'], uilang=item['uilang'])
 
-	episode = item['episode']
-	season = item['season']
-	
-	subtitles_list = []
-
-	if ( item['file_original_path'].find("rar://") > -1 ):
-		item['rar']  = True
-		item['file_original_path'] = os.path.dirname(item['file_original_path'][6:])
-
-	elif ( item['file_original_path'].find("stack://") > -1 ):
-		stackPath = item['file_original_path'].split(" , ")
-		item['file_original_path'] = stackPath[0][8:]
-
-	tvdbid = getShowId()
-	if tvdbid:
-		print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - tvdbid '%s'" % (tvdbid)
-
-		searchurl = 'http://' + apiurl + '/shows/display/' + tvdbid + '.xml?key=' + apikey
-		print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - search url is : '%s'" % (searchurl)
-
-		dom = minidom.parse(urllib.urlopen(searchurl))
-
-		if len(dom.getElementsByTagName('url')):
-			url = dom.getElementsByTagName('url')[0].childNodes[0]
-			url = url.nodeValue
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - show name is '%s'" % (url)
-
-        if url:
-			french = 0
-			english = 0
-			if 'fre' in item['3let_language']: 
-				french = 1
-			if 'eng' in item['3let_language']: 
-				english = 1
-			if ((french > 0 and english > 0) or (french == 0 and english == 0)):
-				searchsuburl = 'http://' + apiurl + '/subtitles/show/' + url + '.xml?season=' + item['season'] + '&episode=' + item['episode'] + '&language=VOVF' + '&key=' + apikey
-			elif (french > 0 and english == 0):
-				searchsuburl = 'http://' + apiurl + '/subtitles/show/' + url + '.xml?season=' + item['season'] + '&episode=' + item['episode'] + '&language=VF' + '&key=' + apikey
-			elif (french == 0 and english > 0):
-				searchsuburl = 'http://' + apiurl + '/subtitles/show/' + url + '.xml?season=' + item['season'] + '&episode=' + item['episode'] + '&language=VO' + '&key=' + apikey
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - searchsuburl is '%s'" % (searchsuburl)
-
-			try:
-				dom = minidom.parse(urllib.urlopen(searchsuburl))
-				subtitles = dom.getElementsByTagName('subtitle')
-				print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - found '%s' subtitles for %s" % (len(subtitles), url)
-
-				for subtitle in subtitles:
-					url = subtitle.getElementsByTagName('url')[0].childNodes[0]
-					url = url.nodeValue
-					print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - subtitle url is : %s" % (url)
-
-					filename = subtitle.getElementsByTagName('file')[0].childNodes[0]
-					filename = filename.nodeValue
-					print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - filename is : %s" % (filename)
-
-					language = subtitle.getElementsByTagName('language')[0].childNodes[0]
-					language = get_languages(language.nodeValue)
-					print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - language is : %s" % (language)
-
-					rating = subtitle.getElementsByTagName('quality')[0].childNodes[0]
-					rating = rating.nodeValue
-					print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - rating is : %s" % (rating)
-
-					ext = os.path.splitext(filename)[1]
-					if ext == '.zip':
-						print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - this is a zip file, analysing content."
-						if len(subtitle.getElementsByTagName('content')) > 0:
-							content = subtitle.getElementsByTagName('content')[0]
-							items = content.getElementsByTagName('item')
-							
-							for item in items:
-								if len(item.childNodes) < 1 : continue
-								
-								subfile = item.childNodes[0].nodeValue
-
-								if os.path.splitext(subfile)[1] == '.zip': continue
-								if os.path.splitext(subfile)[1] == '': continue
-								
-								search_string = "(s%#02de%#02d)|(%d%#02d)|(%dx%#02d)" % (int(season), int(episode),int(season), int(episode),int(season), int(episode))
-								queryep = re.search(search_string, subfile, re.I)
-								if queryep == None: continue
-
-								langs = re.search('\.(VF|VO|en|fr)\..*.{3}$',subfile,re.I)
-
-								print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES -    detecting language for : '%s' ..." % (subfile)
-								try:
-									langs = langs.group(1)
-									lang = {
-										"fr": 'fr',
-										"FR": 'fr',
-										"en": 'en',
-										"EN": 'en',
-										"VF": 'fr',
-										"vf": 'fr',
-										"VO": 'en',
-										"vo": 'en'
-									}[langs]
-									print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES -    ... language is : '%s'" % (lang)
-								except:
-									lang = language
-								
-								filetest = os.path.basename(subfile)
-								print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - file is : %s" % (filetest)
-
-								subtitles_list.append({
-									# if you don't want to see the parent folder for an archive use "filetest"
-									#'filename'          : filetest,
-									'filename'          : subfile,
-									'link'              : url,
-									'language_name'     : languageTranslate(lang,2,0),
-									'language_flag'		: lang,
-									'rating'            : rating,
-									'sync'              : False,
-									})
-								#subtitles_list.sort(key=lambda x: [not x['sync'],x['language_name']])
-								#subtitles_list.sort(key=lambda x: [ x['language_name']], reverse = True)
-
-								if subtitles_list:
-									for it in subtitles_list:
-										listitem = xbmcgui.ListItem(label=it["language_name"],
-										  label2=it["filename"],
-										  iconImage=it["rating"],
-										  thumbnailImage=it["language_flag"]
-										  )
-
-									url = "plugin://%s/?action=download&link=%s&filename=%s" % (__scriptid__, it["link"], it["filename"])
-
-									xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
-
-						else:
-							print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - error analysing zip file : '%s'" % (filename)
-
-					else:
-						subtitles_list.append({
-							'filename'          : filename,
-							'link'              : url,
-							'language_name'     : languageTranslate(language,2,0),
-							'language_flag'		: language,						
-							'rating'            : rating,
-							'sync'              : False
-							})
-
-						if subtitles_list:
-							for it in subtitles_list:
-								listitem = xbmcgui.ListItem(label=it["language_name"],
-								  label2=it["filename"],
-								  iconImage=it["rating"],
-								  thumbnailImage=it["language_flag"]
-								  )
-
-							url = "plugin://%s/?action=download&link=%s&filename=%s" % (__scriptid__, it["link"], it["filename"])
-
-							xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
-
-			except:
-				print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - error"
-
-	# else:
-		# print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - show not found on tvdb, trying from betaserie search"
-		# searchurl = 'http://' + apiurl + '/shows/search.xml?title=' + urllib.quote(title) + '&key=' + apikey
-		# print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - betaserie search url is : '%s'" % (searchurl)
-		# dom = minidom.parse(urllib.urlopen(searchurl))
-		# print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - found show : '%s'" % (dom.getElementsByTagName('url').length)
-		# url = [ e.childNodes[0].nodeValue for e in dom.getElementsByTagName('url') ]
-		# print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - showname is '%s'" % [ e.childNodes[0].nodeValue for e in dom.getElementsByTagName('url') ]
-		# return [ e.childNodes[0].nodeValue for e in dom.getElementsByTagName('url') ]
-
+# called when user clicks on a subtitle
 elif params['action'] == 'download':
-	print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - download fonction called"
-
-	url = params["link"]
-	filename = params["filename"]
-
-	print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - download link : %s" % (params["link"])
-
-	response = urllib.urlopen(url)
-	content = response.read()
-
-	if xbmcvfs.exists(__temp__):
-		shutil.rmtree(__temp__)
-		xbmcvfs.mkdirs(__temp__) 
-
-	if content is not None:
-		header = content[:4]
-		if header == 'Rar!':
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - the file is a rar file."
-			local_tmp_file = os.path.join(__temp__, "betaseries.rar")
-			packed = True
-		elif header == 'PK':
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - the file is a zip file."
-			local_tmp_file = os.path.join(__temp__, "betaseries.zip")
-			packed = True
-		else:
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - the file is a unarchived file."
-			local_tmp_file = os.path.join(__temp__, "betaseries.srt")
-			subs_file = local_tmp_file
-			packed = False
-		print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - saving file to %s" % (local_tmp_file)
-		try :
-			local_file_handle = open(local_tmp_file, "wb")
-			local_file_handle.write(content)
-			local_file_handle.close()
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - sucessfully saved the file :)"
-		except:
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - unsucessfully saved the file :("
-        
-		if packed:
-			files = os.listdir(__temp__)
-			init_filecount = len(files)
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - nombre de fichiers : %s" % (init_filecount)
-
-			filecount = init_filecount
-			max_mtime = 0
-			for file in files:
-				if (string.split(file,'.')[-1] in ['srt','sub','txt','ass']):
-					mtime = os.stat(os.path.join(__temp__.encode("utf-8"), file.encode("utf-8"))).st_mtime
-					if mtime > max_mtime:
-						max_mtime =  mtime
-			init_max_mtime = max_mtime
-			time.sleep(2)
-			print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - extracting files"
-			xbmc.executebuiltin("XBMC.Extract(" + local_tmp_file + "," + __temp__ +")")
-			waittime  = 0
-			while (filecount == init_filecount) and (waittime < 20) and (init_max_mtime == max_mtime): # nothing yet extracted
-				time.sleep(1)  # wait 1 second to let the builtin function 'XBMC.extract' unpack
-				files = os.listdir(__temp__)
-				filecount = len(files)
-			# determine if there is a newer file created in __temp__ (marks that the extraction had completed)
-			for file in files:
-				print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - file inside the temp folder : %s" % (file)
-				if (string.split(file,'.')[-1] in ['srt','sub','txt','ass']):
-					mtime = os.stat(os.path.join(__temp__, file)).st_mtime
-					if (mtime > max_mtime):
-						max_mtime =  mtime
-					if filecount == (init_filecount + 1): filename = file
-			waittime  = waittime + 1
-
-			if waittime == 20:
-				print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - error unpacking files are in : %s" % (__temp__)
-			else:
-				print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - unpacked files in : %s" % (__temp__)
-				print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - checking file %s" % (os.path.join(__temp__, filename))
-				if os.path.exists(os.path.join(__temp__, filename)):
-					file = str(os.path.normpath(os.path.join(__temp__, filename)))
-					print "[SCRIPT] [DEBUG] BETASERIESSUBTITLES - selected file : %s" % (filename)
-					#ext = os.path.splitext(file)[1]
-					#if ext == '.zip':
-					#	log( __name__ ,"target file is zipped, copy to '%s'" % (zip_subs))
-					#	shutil.copy(file, zip_subs)
-
-					subs_file = file
-
-					# removing temp files, (what about a user who don't use a specific subtitles folder?)
-					#if xbmcvfs.exists(__temp__):
-					#	shutil.rmtree(__temp__)
-					#	xbmcvfs.mkdirs(__temp__) 
-
-	listitem = xbmcgui.ListItem(label=subs_file)
-	xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=subs_file,listitem=listitem,isFolder=False)
+    # download link
+    sub = download_subtitle(params["link"], params["ext"], urllib.unquote(params["filename"]), self_host)
+    if sub:
+        # xbmc handles moving and using the subtitle
+        listitem = xbmcgui.ListItem(label=sub)
+        xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=sub,listitem=listitem,isFolder=False)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
