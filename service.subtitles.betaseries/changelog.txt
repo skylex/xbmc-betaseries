@@ -1,11 +1,14 @@
-0.1
-- initial release
+1.0.2
+- improve sorting and a few things
 
-0.2
-- some changes
+1.0.1
+- lang fix (ignore case)
 
 1.0.0
 - complete rewriting
 
-1.0.1
-- lang fix (ignore case)
+0.2
+- some changes
+
+0.1
+- initial release

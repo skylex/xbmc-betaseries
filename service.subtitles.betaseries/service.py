@@ -16,7 +16,7 @@ sys.path.append( os.path.join( __profile__, "lib") )
 self_host = "http://api.betaseries.com"
 self_apikey = "5a85a0adc953"
 self_user_agent = "Mozilla/5.0 (compatible; service.xbmc.betaseries; XBMC)"
-self_team_pattern = re.compile(".*-([^-]+)$")
+self_team_pattern = re.compile(r".*-([^-]+)$")
 self_notify = __addon__.getSetting('notify') == 'true'
 
 TEAMS = (
@@ -157,8 +157,23 @@ def search_subtitles(**search):
     else:
         filename = os.path.basename(search['path']).lower()
         # remove file extension
-        filename = re.sub("\.[^.]+$", "", filename)
+        filename = re.sub(r"\.[^.]+$", "", filename)
     log("after filename = %s" % (filename))
+    # get subtitle team
+    subteams = []
+    subteams.append(str(filename).strip().replace(".","-"))
+    if len(subteams[0]) > 0:
+        # get team name (everything after "-")
+        subteams[0] = str(self_team_pattern.match("-" + subteams[0]).groups()[0]).lower()
+        # find equivalent teams, if any
+        tmp = other_team(subteams[0],0,1)
+        if len(tmp) > 0 and tmp != subteams[0]:
+            subteams.append(tmp)
+        # find other equivalent teams, if any
+        tmp = other_team(subteams[0],1,0)
+        if len(tmp) > 0 and tmp != subteams[0]:
+            subteams.append(tmp)
+    log("after subteams = %s" % (subteams))
     # configure socket
     socket.setdefaulttimeout(10)
     if search['video'] == "movie":
@@ -223,18 +238,21 @@ def search_subtitles(**search):
             # subtitle download url
             link = subtitle["url"]
             log("after link = %s" % (link))
-            # normalize lang
-            lang2 = {
-                "VO": "en",
-                "VF": "fr",
-                "VOVF": "fr",
-            }[subtitle["language"]]
-            # invert rating (needed for order later)
-            note = {
-                "1": "3",
-                "3": "2",
-                "5": "1"
-            }[str(subtitle["quality"])]
+            try:
+                # normalize lang
+                lang2 = {
+                    "VO": "en",
+                    "VF": "fr",
+                    "VOVF": "fr",
+                }[subtitle["language"]]
+            except:
+                log("unsupported language")
+                continue 
+            # get note
+            if 0 <= int(subtitle["quality"]) <= 5:
+                note = int(subtitle["quality"])
+            else:
+                note = 0
             log("after note = %s" % (note))
             # check if file is a subtitle
             if not len(re.findall(r"(?i)\.(srt|ssa|ass|sub)$", subversion)):
@@ -274,70 +292,64 @@ def search_subtitles(**search):
             # if lang = user gui language
             if lang == search['uilang']:
                 # put this file on top
-                order = 0
+                uilang = True
             else:
-                order = 1
+                uilang = False
             log("after lang = %s, lang2 = %s" % (lang, lang2))
-            # get subtitle team
-            subteam = str(filename).strip().replace(".","-")
-            if len(subteam) > 0:
-                # get team name (everything after "-")
-                subteam = str(self_team_pattern.match("-" + subteam).groups()[0]).lower()
-                log("after subteam = %s" % (subteam))
-                # find HD equivalent team if exists (or SD equivalent)
-                if filename.find("720p") > -1:
-                    subteam2 = other_team(subteam,0,1)
-                else:
-                    subteam2 = other_team(subteam,1,0)
-                log("after subteam2 = %s" % (subteam2))
+            # check sync
+            sync = False
+            team = False
+            for (key, subteam) in enumerate(subteams):
                 # if team corresponds
-                if len(re.findall(r"(?i)[ _.-](" + subteam + "|" + subteam2 + ")[ _.-]", subversion)) > 0:
+                if len(subteam) > 0 and len(re.findall(r"(?i)[ _.-](" + subteam + ")[ _.-]", subversion)) > 0:
                     # set sync tag
                     sync = True
-                else:
-                    sync = False
-            else:
-                sync = False
+                    # if videofile team matches subfile team
+                    if key == 0:
+                        team = True
             log("after sync = %s" % (sync))
             # check if this is for hearing impaired
-            if len(re.findall(r"(?i)\.(CC|HI)\.", re.sub(r"[ _-]", ".", subversion) )) > 0:
+            if len(re.findall(r"(?i)[ _-](CC|HI)[ _-]", subversion)) > 0:
                 cc = True
             else:
                 cc = False
             # if language allowed by user
             if lang2 in search['langs']:
                 # add subtitle to list
-                subtitles.append({'order':order,'ext':ext,'filename':subversion,'link':link,'lang':lang,'lang2':lang2,"cc":cc,"sync":sync,"note":note})
+                subtitles.append({'uilang':uilang,'ext':ext,'filename':subversion,'link':link,'lang':lang,'lang2':lang2,"cc":cc,"sync":sync,"note":note,"team":team})
                 log("subtitle added : %s" % (subversion))
         log("--------------------------")
     if subtitles:
-        # get settings for order
+        # get settings for sorting
         uifirst = __addon__.getSetting('uifirst') == 'true'
         ccfirst = __addon__.getSetting('ccfirst') == 'true'
-        # order accordingly
+        # sort accordingly
+        log("sorting by filename asc")
+        subtitles.sort(key=lambda x: [x['filename']])
+        if not ccfirst:
+            log("sorting by cc last")
+            subtitles.sort(key=lambda x: [x['cc']])
+        log("sorting by note best")
+        subtitles.sort(key=lambda x: [x['note']], reverse=True)
+        log("sorting by lang asc")
+        subtitles.sort(key=lambda x: [x['lang']])
+        if ccfirst:
+            log("sorting by cc first")
+            subtitles.sort(key=lambda x: [not x['cc']])
         if uifirst:
-            if ccfirst:
-                subtitles.sort(key=lambda x: [not x['sync'], x['order'], not x['cc'], x['lang'], x['note'], x['filename']])
-            else:
-                subtitles.sort(key=lambda x: [not x['sync'], x['order'], x['lang'], x['note'], x['cc'], x['filename']])
-        else:
-            if ccfirst:
-                subtitles.sort(key=lambda x: [not x['sync'], not x['cc'], x['lang'], x['note'], x['filename']])
-            else:
-                subtitles.sort(key=lambda x: [not x['sync'], x['lang'], x['note'], x['cc'], x['filename']])
+            log("sorting by uilang first")
+            subtitles.sort(key=lambda x: [not x['uilang']])
+        log("sorting by sync first")
+        subtitles.sort(key=lambda x: [not x['sync']])
+        log("sorting by team first")
+        subtitles.sort(key=lambda x: [not x['team']])
         log("sorted subtitles = %s" % (subtitles))
         # for each subtitle
         for item in subtitles:
-            # set rating
-            item["rating"] = {
-                "1": "5",
-                "2": "3",
-                "3": "1"
-            }[item["note"]]
             # xbmc list item format
             listitem = xbmcgui.ListItem(label=item["lang"],
               label2=item["filename"],
-              iconImage=item["rating"],
+              iconImage=str(item["note"]),
               thumbnailImage=item["lang2"])
             # setting sync / CC tag
             listitem.setProperty("sync", 'true' if item["sync"] else 'false')
