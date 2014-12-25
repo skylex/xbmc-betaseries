@@ -291,9 +291,24 @@ class MyPlayer(xbmc.Monitor):
                         log("watching episode, library id = %s" % result['item']['id'])
                         self.Play = True
             elif method == 'Player.OnStop':
-                # avoid setting Play=False before marking episode
-                xbmc.sleep(1000)
                 log("stopped playback")
+                result = json.loads(data)
+                # if viewing in file mode and playback stopped at the end
+                if 'item' in result and 'title' in result["item"] and result["end"]:
+                    # scrap episode infos from filename (item -> title)
+                    scraper_url = "%s/episodes/scraper?file=%s&key=%s" % (self.service[1], result["item"]["title"], self.service[2])
+                    scraper_data = json.loads(get_urldata(scraper_url,"","GET"))["episode"]
+                    title = str(scraper_data["season"]) + "x" + str(scraper_data["episode"])
+                    # get show's tvdbid from showid
+                    show_url = "%s/shows/display?id=%s&key=%s" % (self.service[1], scraper_data["show_id"], self.service[2])
+                    tvdbid = json.loads(get_urldata(show_url,"","GET"))["show"]["thetvdb_id"]
+                    # set episode infos
+                    episode = [int(tvdbid), int(scraper_data["thetvdb_id"]), 1, True, str(scraper_data["show_title"]), title]
+                    # mark episode as watched
+                    self.action(episode, self.service)
+                else:
+                    # wait 1s to avoid setting Play=False before marking episode
+                    xbmc.sleep(1000)
                 self.Play = False
             elif method == 'VideoLibrary.OnUpdate':
                 result = json.loads(data)

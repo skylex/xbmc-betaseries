@@ -1,3 +1,6 @@
+1.0.6
+- allow marking episode when in file mode
+
 1.0.5
 - change name, api key and add data on ua
 
