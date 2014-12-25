@@ -243,9 +243,9 @@ def search_subtitles(**search):
         else:
             content = [subtitle["file"]]
         log("after content = %s" % (content))
-        log("-------------")
         # for each file in content
         for subversion in content:
+            log("-------------")
             # subtitle file name
             subversion = str(subversion)
             log("after subversion = %s" % (subversion))
@@ -257,7 +257,7 @@ def search_subtitles(**search):
                 lang2 = {
                     "VO": "en",
                     "VF": "fr",
-                    "VOVF": "fr",
+                    "VOVF": "xx",
                 }[subtitle["language"]]
             except:
                 log("unsupported language")
@@ -279,10 +279,15 @@ def search_subtitles(**search):
                 if not re.search(search_string, subversion):
                     log("file not matching episode : %s" % (subversion))
                     continue
-                 # get file lang
+                # get subtitle file lang
+                langs = re.search(r"(?i)[ _.-](english|french|eng|fre|en|fr|vo|vf)[ _.-]", subversion)
+                # or get zip file lang
+                if langs == None:
+                    langs = lang2
+                else:
+                    langs = langs.group(1).lower()
+                log("after zip langs = %s" % (lang2))
                 try:
-                    langs = re.search(r"(?i)[ _.-](english|french|eng|fre|en|fr|vo|vf)[ _.-]", subversion).group(1).lower()
-                    log("after zip langs = %s" % (lang2))
                     lang2 = {
                         "french": 'fr',
                         "english": 'en',
@@ -293,10 +298,10 @@ def search_subtitles(**search):
                         "vf": 'fr',
                         "vo": 'en'
                     }[langs]
-                    log("after zip lang2 = %s" % (lang2))
                 except:
                     log("unsupported language")
                     continue
+                log("after zip lang2 = %s" % (lang2))
             try:
                 # get full language name
                 lang = xbmc.convertLanguage(lang2, xbmc.ENGLISH_NAME)
@@ -323,10 +328,11 @@ def search_subtitles(**search):
                         team = True
             log("after sync = %s" % (sync))
             # check if this is for hearing impaired
-            if len(re.findall(r"(?i)[ _-](CC|HI)[ _-]", subversion)) > 0:
+            if len(re.findall(r"(?i)[ _.-](CC|HI)[ _.-]", subversion)) > 0:
                 cc = True
             else:
                 cc = False
+            log("after cc = %s" % (cc))
             # if language allowed by user
             if lang2 in search['langs']:
                 # add subtitle to list

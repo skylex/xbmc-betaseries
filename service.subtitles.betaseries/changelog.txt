@@ -1,3 +1,6 @@
+1.0.4
+- fix CC and zip langs
+
 1.0.3
 - small improvements and add data on ua
 
