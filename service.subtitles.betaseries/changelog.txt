@@ -1,3 +1,6 @@
+1.0.3
+- small improvements and add data on ua
+
 1.0.2
 - improve sorting and a few things
 

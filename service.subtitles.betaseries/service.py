@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil, time
-import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs, json
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
+import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil, time, platform
+import simplejson as json
 
 __addon__        = xbmcaddon.Addon()
 __addonid__      = __addon__.getAddonInfo('id')
 __addonname__    = __addon__.getAddonInfo('name')
+__addonversion__ = __addon__.getAddonInfo('version')
 __icon__         = __addon__.getAddonInfo('icon')
 __language__     = __addon__.getLocalizedString
+__platform__     = platform.system() + " " + platform.release()
 __profile__      = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
 __temp__         = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
 
@@ -15,7 +18,6 @@ sys.path.append( os.path.join( __profile__, "lib") )
 
 self_host = "http://api.betaseries.com"
 self_apikey = "5a85a0adc953"
-self_user_agent = "Mozilla/5.0 (compatible; service.xbmc.betaseries; XBMC)"
 self_team_pattern = re.compile(r".*-([^-]+)$")
 self_notify = __addon__.getSetting('notify') == 'true'
 
@@ -55,6 +57,18 @@ def normalize_string(str):
 def log(txt, level=xbmc.LOGDEBUG):
     message = u'%s: %s' % (__addonid__, txt)
     xbmc.log(msg=message, level=level)
+
+def set_user_agent():
+    json_query = json.loads(xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }'))
+    try:
+        major = str(json_query['result']['version']['major'])
+        minor = str(json_query['result']['version']['minor'])
+        name = "Kodi" if int(major) >= 14 else "XBMC"
+        version = "%s %s.%s" % (name, major, minor)
+    except:
+        log("could not get app version")
+        version = "XBMC"
+    return "Mozilla/5.0 (compatible; " + __platform__ + "; " + version + "; " + __addonid__ + "/" + __addonversion__ + ")"
 
 def get_params(string=""):
   param=[]
@@ -149,7 +163,7 @@ def download_subtitle(url, ext, subversion, referer):
 
 def search_subtitles(**search):
     subtitles = []
-    log("Entering search_subtitles()")
+    log("entering search_subtitles()")
     # get video file name
     dirsync = __addon__.getSetting('dirsync') == 'true'
     if dirsync:
@@ -180,14 +194,14 @@ def search_subtitles(**search):
         return false
     elif search['video'] == "tvshow":
         # get playerid
-        playerid_query = '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}'
-        playerid = json.loads(xbmc.executeJSONRPC(playerid_query))['result'][0]['playerid']
+        json_query = '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}'
+        playerid = json.loads(xbmc.executeJSONRPC(json_query))['result'][0]['playerid']
         # get tvshowid
-        tvshowid_query = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": {"playerid": ' + str(playerid) + ', "properties": ["tvshowid"]}, "id": 1}'
-        tvshowid = json.loads(xbmc.executeJSONRPC (tvshowid_query))['result']['item']['tvshowid']
+        json_query = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": {"playerid": ' + str(playerid) + ', "properties": ["tvshowid"]}, "id": 1}'
+        tvshowid = json.loads(xbmc.executeJSONRPC (json_query))['result']['item']['tvshowid']
         # get tvdbid
-        tvdbid_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshowid) + ', "properties": ["imdbnumber"]}, "id": 1}'
-        tvdbid_result = json.loads(xbmc.executeJSONRPC(tvdbid_query))
+        json_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshowid) + ', "properties": ["imdbnumber"]}, "id": 1}'
+        tvdbid_result = json.loads(xbmc.executeJSONRPC(json_query))
         # if we have tvdbid, work with ids
         if 'result' in tvdbid_result:
             tvdbid = tvdbid_result['result']['tvshowdetails']['imdbnumber']
@@ -370,6 +384,9 @@ log("deleting temp tree")
 shutil.rmtree(__temp__)
 log("recreating temp dir")
 xbmcvfs.mkdirs(__temp__)
+
+# define user-agent
+self_user_agent = set_user_agent()
 
 # get params
 params = get_params()
