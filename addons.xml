@@ -63,7 +63,7 @@
 	</extension>
 </addon>
 
-<addon id="service.subtitles.betaseries" name="Betaseries" version="1.0.3" provider-name="skylex">
+<addon id="service.subtitles.betaseries" name="Betaseries" version="1.0.4" provider-name="skylex">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 		<import addon="script.module.simplejson" version="2.0.10" />
