@@ -69,7 +69,7 @@ class Main:
             xbmc.sleep(1000)
 
     def _service_setup( self ):
-        self.apikey       = '16e587ee3891'
+        self.apikey       = '5a85a0adc953'
         self.apiurl       = 'https://api.betaseries.com'
         self.apiver       = '2.2'
         self.Monitor      = MyMonitor(action = self._get_settings)
