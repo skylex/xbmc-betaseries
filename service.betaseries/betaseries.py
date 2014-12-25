@@ -15,7 +15,7 @@
 # *
 # * code structure and portions of code based on service.scrobbler.librefm by Team-XBMC
 
-import urllib, urllib2, socket, hashlib, time, platform
+import urllib, urllib2, socket, hashlib, time
 import xbmc, xbmcgui, xbmcaddon
 from xml.dom import minidom
 import simplejson as json
@@ -25,8 +25,8 @@ __addonid__      = __addon__.getAddonInfo('id')
 __addonname__    = __addon__.getAddonInfo('name')
 __addonversion__ = __addon__.getAddonInfo('version')
 __icon__         = __addon__.getAddonInfo('icon')
-__platform__     = platform.system() + " " + platform.release()
 __language__     = __addon__.getLocalizedString
+__useragent__    = 'Mozilla/5.0 (compatible; XBMC; ' + __addonid__ + '/' + __addonversion__ + ')'
 
 socket.setdefaulttimeout(10)
 
@@ -35,18 +35,6 @@ def log(txt, loglevel=xbmc.LOGDEBUG):
         txt = txt.decode("utf-8")
     message = u'%s: %s' % (__addonid__, txt)
     xbmc.log(msg=message.encode("utf-8"), level=loglevel)
-
-def set_user_agent():
-    json_query = json.loads(xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }'))
-    try:
-        major = str(json_query['result']['version']['major'])
-        minor = str(json_query['result']['version']['minor'])
-        name = "Kodi" if int(major) >= 14 else "XBMC"
-        version = "%s %s.%s" % (name, major, minor)
-    except:
-        log("could not get app version")
-        version = "XBMC"
-    return "Mozilla/5.0 (compatible; " + __platform__ + "; " + version + "; " + __addonid__ + "/" + __addonversion__ + ")"
 
 def get_urldata(url, urldata, method):
     # create a handler
@@ -81,7 +69,7 @@ class Main:
             xbmc.sleep(1000)
 
     def _service_setup( self ):
-        self.apikey       = '5a85a0adc953'
+        self.apikey       = '16e587ee3891'
         self.apiurl       = 'https://api.betaseries.com'
         self.apiver       = '2.2'
         self.Monitor      = MyMonitor(action = self._get_settings)
@@ -352,5 +340,4 @@ class MyMonitor(xbmc.Monitor):
 # start script
 if ( __name__ == "__main__" ):
     log('script version %s started' % __addonversion__)
-    __useragent__ = set_user_agent()
     Main()
