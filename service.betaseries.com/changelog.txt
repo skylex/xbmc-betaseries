@@ -1,3 +1,6 @@
+1.0.4
+- rename plugin because of conflict with subtitles addon
+
 1.0.3
 - add import of simplejson module
 
