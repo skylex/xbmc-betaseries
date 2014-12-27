@@ -97,8 +97,6 @@ def get_url(url, referer=self_host):
         log('HTTPError = ' + str(e.code), xbmc.LOGERROR)
     except urllib2.URLError, e:
         log('URLError = ' + str(e.reason), xbmc.LOGERROR)
-    except httplib.HTTPException, e:
-        log('HTTPException', xbmc.LOGERROR)
     except Exception:
         import traceback
         log('generic exception: ' + traceback.format_exc(), xbmc.LOGERROR)

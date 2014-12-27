@@ -1,3 +1,6 @@
+1.0.5
+- remove httplib usage
+
 1.0.4
 - add missing httplib in imports
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, re, string, urllib, urllib2, httplib, socket, unicodedata, shutil
+import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
 
 __addon__        = xbmcaddon.Addon()
@@ -85,8 +85,6 @@ def get_url(url, referer=self_host):
         log('HTTPError = ' + str(e.code), xbmc.LOGERROR)
     except urllib2.URLError, e:
         log('URLError = ' + str(e.reason), xbmc.LOGERROR)
-    except httplib.HTTPException, e:
-        log('HTTPException', xbmc.LOGERROR)
     except Exception:
         import traceback
         log('generic exception: ' + traceback.format_exc(), xbmc.LOGERROR)
