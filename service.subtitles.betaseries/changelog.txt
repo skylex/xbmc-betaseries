@@ -1,3 +1,6 @@
+1.0.5
+- fix temp dir cleanup
+
 1.0.4
 - fix CC and zip langs
 
