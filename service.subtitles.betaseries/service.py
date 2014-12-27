@@ -387,7 +387,7 @@ def search_subtitles(**search):
 
 # clean up
 log("deleting temp tree")
-shutil.rmtree(__temp__)
+if xbmcvfs.exists(__temp__):shutil.rmtree(__temp__)
 log("recreating temp dir")
 xbmcvfs.mkdirs(__temp__)
 
