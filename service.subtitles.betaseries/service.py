@@ -18,6 +18,7 @@ sys.path.append( os.path.join( __profile__, "lib") )
 
 self_host = "http://api.betaseries.com"
 self_apikey = "5a85a0adc953"
+self_apiver = "2.4"
 self_team_pattern = re.compile(r".*-([^-]+)$")
 self_notify = __addon__.getSetting('notify') == 'true'
 
@@ -51,8 +52,8 @@ def normalize_lang(lang, lang_from, lang_to):
     # return lang if not found
     return lang
 
-def normalize_string(str):
-    return unicodedata.normalize('NFKD', unicode(unicode(str, 'utf-8'))).encode('ascii','ignore')
+def normalize_string(txt):
+    return unicodedata.normalize('NFKD', txt).encode('ascii', 'ignore')
 
 def log(txt, level=xbmc.LOGDEBUG):
     message = u'%s: %s' % (__addonid__, txt)
@@ -105,10 +106,10 @@ def get_url(url, referer=self_host):
         return contents
     except urllib2.HTTPError, e:
         log('HTTPError = ' + str(e.code), xbmc.LOGERROR)
+        if e.code == 400:
+            return False
     except urllib2.URLError, e:
         log('URLError = ' + str(e.reason), xbmc.LOGERROR)
-    except httplib.HTTPException, e:
-        log('HTTPException', xbmc.LOGERROR)
     except Exception:
         import traceback
         log('generic exception: ' + traceback.format_exc(), xbmc.LOGERROR)
@@ -151,34 +152,44 @@ def download_subtitle(url, ext, subversion, referer):
                 log("looking for %s" % (subversion))
                 for filename in files:
                     log("checking file %s" % (filename))
-                    if str(filename) == str(subversion):
-                        file = str(os.path.normpath(os.path.join(__temp__, filename)))
+                    if normalize_string(filename) == subversion:
+                        filepath = os.path.normpath(os.path.join(__temp__, filename))
                         log("selected file : %s" % (filename))
-                        return file
+                        return filepath
         else:
             log("selected file : %s" % (subversion))
             return local_tmp_file
     else:
         return False
 
-def search_subtitles(**search):
+def search_subtitles(search):
     subtitles = []
     log("entering search_subtitles()")
+    if search['mode'] == "movie":
+        log("movies not supported!")
+        return False
     # get video file name
     dirsync = __addon__.getSetting('dirsync') == 'true'
     if dirsync:
+        # get directory name as filename
         filename = os.path.basename(os.path.dirname(search['path'])).lower()
     else:
+        # or use filename
         filename = os.path.basename(search['path']).lower()
-        # remove file extension
+        # and remove file extension
         filename = re.sub(r"\.[^.]+$", "", filename)
+    filename = normalize_string(filename)
     log("after filename = %s" % (filename))
+    # if file, check if valid tvshow
+    if search['mode'] == "file" and not re.search(r"(?i)(s[0-9]+e[0-9]+|[0-9]+x?[0-9]{2,})", filename):
+        log("not a tvshow or badly named!")
+        return False
     # get subtitle team
     subteams = []
-    subteams.append(str(filename).strip().replace(".","-"))
+    subteams.append(filename.replace(".","-"))
     if len(subteams[0]) > 0:
         # get team name (everything after "-")
-        subteams[0] = str(self_team_pattern.match("-" + subteams[0]).groups()[0]).lower()
+        subteams[0] = self_team_pattern.match("-" + subteams[0]).groups()[0].lower()
         # find equivalent teams, if any
         tmp = other_team(subteams[0],0,1)
         if len(tmp) > 0 and tmp != subteams[0]:
@@ -190,43 +201,49 @@ def search_subtitles(**search):
     log("after subteams = %s" % (subteams))
     # configure socket
     socket.setdefaulttimeout(10)
-    if search['video'] == "movie":
-        return false
-    elif search['video'] == "tvshow":
+    # define default url to get betaseries episode id from filename
+    episodeurl = "%s/episodes/scraper?file=%s&key=%s&v=%s" % (self_host, urllib.quote(filename), self_apikey, self_apiver)
+    # check video type
+    if search['mode'] == "tvshow":
         # get playerid
         json_query = '{"jsonrpc": "2.0", "method": "Player.GetActivePlayers", "id": 1}'
         playerid = json.loads(xbmc.executeJSONRPC(json_query))['result'][0]['playerid']
         # get tvshowid
         json_query = '{"jsonrpc": "2.0", "method": "Player.GetItem", "params": {"playerid": ' + str(playerid) + ', "properties": ["tvshowid"]}, "id": 1}'
         tvshowid = json.loads(xbmc.executeJSONRPC (json_query))['result']['item']['tvshowid']
-        # get tvdbid
-        json_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshowid) + ', "properties": ["imdbnumber"]}, "id": 1}'
-        tvdbid_result = json.loads(xbmc.executeJSONRPC(json_query))
-        # if we have tvdbid, work with ids
-        if 'result' in tvdbid_result:
-            tvdbid = tvdbid_result['result']['tvshowdetails']['imdbnumber']
-            showurl = "%s/shows/display?thetvdb_id=%s&key=%s" % (self_host, tvdbid, self_apikey)
-            showid = json.loads(get_url(showurl))["show"]["id"]
-            episodeurl = "%s/episodes/search?show_id=%s&number=S%#02dE%#02d&key=%s" % (self_host, showid, int(search['season']), int(search['episode']), self_apikey)
-            episodeid = json.loads(get_url(episodeurl))["episode"]["id"]
-        # or scrap from filename
-        else:
-            scrapurl = "%s/episodes/scraper?file=%s&key=%s" % (self_host, filename, self_apikey)
-            episodeid = json.loads(get_url(scrapurl))["episode"]["id"]
-        # then get subtitles
-        listurl = "%s/subtitles/episode?id=%s&key=%s" % (self_host, episodeid, self_apikey)
-    # get data
-    content = get_url(listurl)
-    data = json.loads(content)["subtitles"]
-    if not data:
-        log("no data, cannot continue")
+        # check result
+        if tvshowid > 0:
+            # get tvdbid
+            json_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshowid) + ', "properties": ["imdbnumber"]}, "id": 1}'
+            tvdbid_result = json.loads(xbmc.executeJSONRPC(json_query))
+            # if we have tvdbid, work with ids
+            if 'result' in tvdbid_result:
+                # get betaseries show id from tvdbid
+                tvdbid = tvdbid_result['result']['tvshowdetails']['imdbnumber']
+                showurl = "%s/shows/display?thetvdb_id=%s&key=%s&v=%s" % (self_host, tvdbid, self_apikey, self_apiver)
+                showid = json.loads(get_url(showurl))["show"]["id"]
+                log("after showid = %s" % (showid))
+                # then get betaseries episode id
+                episodeurl = "%s/episodes/search?show_id=%s&number=S%#02dE%#02d&key=%s&v=%s" % (self_host, showid, int(search['season']), int(search['episode']), self_apikey, self_apiver)
+    try:
+        episodeid = json.loads(get_url(episodeurl))["episode"]["id"]
+        log("after episodeid = %s" % (episodeid))
+    except:
+        log("error or episode not found!")
+        return False
+    # then get subtitles list
+    listurl = "%s/subtitles/episode?id=%s&key=%s&v=%s" % (self_host, episodeid, self_apikey, self_apiver)
+    try:
+        data = json.loads(get_url(listurl))["subtitles"]
+    except:
+        log("could not parse data or fetch url, cannot continue")
         return False
     # for each release version
     log("parsing data after urlopen")
     log("--------------------------")
     for subtitle in data:
         # get filename
-        subfile = str(subtitle["file"])
+        subfile = normalize_string(subtitle["file"])
         log("after subfile = %s" % (subfile))
         # get file extension
         ext = string.split(subfile,'.')[-1]
@@ -247,7 +264,7 @@ def search_subtitles(**search):
         for subversion in content:
             log("-------------")
             # subtitle file name
-            subversion = str(subversion)
+            subversion = normalize_string(subversion)
             log("after subversion = %s" % (subversion))
             # subtitle download url
             link = subtitle["url"]
@@ -381,14 +398,15 @@ def search_subtitles(**search):
         if self_notify:
             xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30010), 750, __icon__)).encode('utf-8', 'ignore'))
         log("nothing found")
-    log("End of search_subtitles()")
+    log("end of search_subtitles()")
 
 # start of script
 
 # clean up
-log("deleting temp tree")
-if os.path.exists(__temp__):shutil.rmtree(__temp__)
-log("recreating temp dir")
+if os.path.exists(__temp__):
+    log("deleting temp tree...")
+    shutil.rmtree(__temp__)
+log("recreating temp dir...")
 xbmcvfs.mkdirs(__temp__)
 
 # define user-agent
@@ -400,32 +418,30 @@ params = get_params()
 # called when user is searching for subtitles
 if params['action'] == 'search':
     item = {}
+    item['tvshow']  = xbmc.getInfoLabel("VideoPlayer.TVshowtitle").decode("utf-8")
     item['year']    = xbmc.getInfoLabel("VideoPlayer.Year")
     item['season']  = xbmc.getInfoLabel("VideoPlayer.Season")
     item['episode'] = xbmc.getInfoLabel("VideoPlayer.Episode")
-    item['tvshow']  = normalize_string(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))
-    item['title']   = normalize_string(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))
     item['path']    = urllib.unquote(xbmc.Player().getPlayingFile().decode('utf-8'))
-    item['uilang']  = str(xbmc.getLanguage())
+    item['uilang']  = xbmc.getLanguage()
     item['langs']   = []
     # get user preferred languages for subtitles
     for lang in urllib.unquote(params['languages']).decode('utf-8').split(","):
         item['langs'].append(xbmc.convertLanguage(lang, xbmc.ISO_639_1))
-    log("user langs = %s" % (item['langs']))
     # remove rar:// or stack://
     if ( item['path'].find("rar://") > -1 ):
         item['path'] = os.path.dirname(item['path'][6:])
     elif ( item['path'].find("stack://") > -1 ):
         stackPath = item['path'].split(" , ")
         item['path'] = stackPath[0][8:]
-    # call search_subtitles()
-    log("item = %s" % (item))
-    if item['tvshow'] != "":
-        search_subtitles(video="tvshow", name=item['tvshow'], season=item['season'], episode=item['episode'], path=item['path'], langs=item['langs'], uilang=item['uilang'])
-    elif item['year'] != "":
-        exit
-    else:
-        search_subtitles(video="tvshow", path=item['path'], langs=item['langs'], uilang=item['uilang'])
+    # show item data in debug log
+    log("after item = %s" % (item))
+    # find playing mode
+    if len(item['tvshow']) > 0: item['mode'] = "tvshow"
+    elif item['year'] != "": item['mode'] = "movie"
+    else: item['mode'] = "file"
+    # search for subtitles
+    search_subtitles(item)
 
 # called when user clicks on a subtitle
 elif params['action'] == 'download':
