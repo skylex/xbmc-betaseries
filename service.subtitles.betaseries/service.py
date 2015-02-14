@@ -405,7 +405,7 @@ def search_subtitles(search):
 # clean up
 if os.path.exists(__temp__):
     log("deleting temp tree...")
-    shutil.rmtree(__temp__)
+    shutil.rmtree(__temp__.encode("utf-8","ignore"))
 log("recreating temp dir...")
 xbmcvfs.mkdirs(__temp__)
 
