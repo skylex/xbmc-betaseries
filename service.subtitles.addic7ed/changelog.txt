@@ -1,3 +1,6 @@
+1.0.7
+- small fix for last option label
+
 1.0.6
 - fixed rmtree with accents, added option to hide incomplete subtitles
 
