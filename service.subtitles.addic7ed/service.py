@@ -21,7 +21,7 @@ self_team_pattern = re.compile(".*-([^-]+)$")
 self_notify = __addon__.getSetting('notify') == 'true'
 
 if xbmcvfs.exists(__temp__):
-  shutil.rmtree(__temp__)
+  shutil.rmtree(__temp__.encode("utf-8","ignore"))
 xbmcvfs.mkdirs(__temp__)
 
 TEAMS = (
@@ -233,6 +233,8 @@ def search_subtitles(**search):
                     elif html_img['title'] == "Hearing Impaired":
                         cc = True
                 log("after corrected = %s, cc = %s" % (corrected, cc))
+                # get value of option "hide incomplete subtitles"
+                hideinc = __addon__.getSetting('hideinc') == 'true'
                 # set note
                 if status == "Completed":
                     if corrected:
@@ -240,7 +242,11 @@ def search_subtitles(**search):
                     else:
                         note = '2'
                 else:
-                    note = '3'
+                    if hideinc:
+                        log("incomplete subtitle")
+                        break
+                    else:
+                        note = '3'
                 log("after note = %s" % (note))
                 # if language allowed by user
                 if lang2 in search['langs']:

@@ -20,7 +20,7 @@ self_team_pattern = re.compile(".*-([^-]+)$")
 self_notify = __addon__.getSetting('notify') == 'true'
 
 if xbmcvfs.exists(__temp__):
-  shutil.rmtree(__temp__)
+  shutil.rmtree(__temp__.encode("utf-8","ignore"))
 xbmcvfs.mkdirs(__temp__)
 
 TEAMS = (

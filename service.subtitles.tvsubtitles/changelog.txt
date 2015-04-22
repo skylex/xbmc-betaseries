@@ -1,3 +1,6 @@
+1.0.2
+- fixed rmtree with accents
+
 1.0.1
 - remove httplib usage
 
