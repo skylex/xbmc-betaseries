@@ -323,8 +323,11 @@ class MyPlayer(xbmc.Monitor):
 
     def _get_info( self, episodeid, playcount, playstatus ):
         try:
-            tvshow_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"episodeid": ' + str(episodeid) + ', "properties": ["tvshowid", "showtitle", "season", "episode"]}, "id": 1}'
+            tvshow_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"episodeid": ' + str(episodeid) + ', "properties": ["tvshowid", "showtitle", "season", "episode", "uniqueid"]}, "id": 1}'
             tvshow = json.loads(xbmc.executeJSONRPC (tvshow_query))['result']['episodedetails']
+            if 'uniqueid' in tvshow and 'unknown' in tvshow['uniqueid']:
+                tvdbepid = tvshow['uniqueid']['unknown']
+                log("theTvDb episode id : %s" % tvdbepid)
             tvdbid_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"tvshowid": ' + str(tvshow['tvshowid']) + ', "properties": ["imdbnumber"]}, "id": 1}'
             tvdbid = json.loads(xbmc.executeJSONRPC (tvdbid_query))['result']['tvshowdetails']['imdbnumber']
             showtitle = tvshow['showtitle'].encode("utf-8")
@@ -341,15 +344,16 @@ class MyPlayer(xbmc.Monitor):
             except:
                 log("could not fetch tvshow's thetvdb_id", xbmc.LOGNOTICE)
                 return False
-        url = self.service[1] + '/shows/episodes'
-        urldata = '?v=2.2&key=' + self.service[2] + '&thetvdb_id=' + str(tvdbid) + '&season=' + str(tvshow['season']) + '&episode=' + str(tvshow['episode'])
-        try:
-            tvdbepid_query = get_urldata(url + urldata, '', "GET")
-            tvdbepid_query = json.loads(tvdbepid_query)
-            tvdbepid = tvdbepid_query['episodes'][0]['thetvdb_id']
-        except:
-            log("could not fetch episode's thetvdb_id", xbmc.LOGNOTICE)
-            return False
+        if not tvdbepid:
+            url = self.service[1] + '/shows/episodes'
+            urldata = '?v=2.2&key=' + self.service[2] + '&thetvdb_id=' + str(tvdbid) + '&season=' + str(tvshow['season']) + '&episode=' + str(tvshow['episode'])
+            try:
+                tvdbepid_query = get_urldata(url + urldata, '', "GET")
+                tvdbepid_query = json.loads(tvdbepid_query)
+                tvdbepid = tvdbepid_query['episodes'][0]['thetvdb_id']
+            except:
+                log("could not fetch episode's thetvdb_id", xbmc.LOGNOTICE)
+                return False
 
         epinfo = [int(tvdbid), int(tvdbepid), int(playcount), bool(playstatus), showtitle, epname]
         return epinfo
