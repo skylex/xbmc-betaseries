@@ -243,9 +243,11 @@ def search_subtitles(**search):
                         note = '2'
                 else:
                     if hideinc:
-                        log("incomplete subtitle")
-                        break
+                        log("incomplete subtitle, not added")
+                        log("--------------------------")
+                        continue
                     else:
+                        log("incomplete subtitle !")
                         note = '3'
                 log("after note = %s" % (note))
                 # if language allowed by user
