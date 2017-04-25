@@ -72,6 +72,14 @@ msgctxt "#30015"
 msgid "Episode marked as not watched !"
 msgstr "Episode marqué comme non vu !"
 
+msgctxt "#30016"
+msgid "Movie marked as watched !"
+msgstr "Film marqué comme vu !"
+
+msgctxt "#30017"
+msgid "Movie marked as not watched !"
+msgstr "Film marqué comme non vu !"
+
 msgctxt "#32001"
 msgid "Authentication error"
 msgstr "Erreur d'authentification"
@@ -95,3 +103,7 @@ msgstr "Erreur lors de l'ajout de la série : "
 msgctxt "#32006"
 msgid "Failed to mark episode !"
 msgstr "Erreur lors du marquage de l'épisode !"
+
+msgctxt "#32007"
+msgid "Failed to mark movie !"
+msgstr "Erreur lors du marquage du film !"
