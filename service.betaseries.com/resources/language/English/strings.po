@@ -74,7 +74,15 @@ msgctxt "#30015"
 msgid "Episode marked as not watched !"
 msgstr ""
 
-#empty strings from id 30016 to 32000
+msgctxt "#30016"
+msgid "Movie marked as watched !"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Movie marked as not watched !"
+msgstr ""
+
+#empty strings from id 30018 to 32000
 
 msgctxt "#32001"
 msgid "Authentication error"
@@ -98,4 +106,8 @@ msgstr ""
 
 msgctxt "#32006"
 msgid "Failed to mark episode !"
+msgstr ""
+
+msgctxt "#32007"
+msgid "Failed to mark movie !"
 msgstr ""
