@@ -220,10 +220,10 @@ class Main:
             method = "POST"
             if episode[2] == 0:
                 act = "not watched"
-                actlang = 30015
+                actlang = 30017
             else:
                 act = "watched"
-                actlang = 30014
+                actlang = 30016
         elif episode[6]=='episode':
             # mark episode as watched
             url = service[1] + "/episodes/watched"
@@ -233,11 +233,11 @@ class Main:
             if episode[2] == 0:
                 method = "DELETE"
                 act = "not watched"
-                actlang = 30017
+                actlang = 30015
             else:
                 method = "POST"
                 act = "watched"
-                actlang = 30016
+                actlang = 30014
         try:
             # marking request
             response = get_urldata(url, urldata, method)
