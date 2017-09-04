@@ -226,15 +226,21 @@ class Main:
                 actlang = 30016
         elif episode[6]=='episode':
             # mark episode as watched
-            url = service[1] + "/episodes/watched"
             urldata = {'v':self.apiver, 'key':service[2], 'token':service[6], 'thetvdb_id':episode[1]}
             if service[11]:
                 urldata.update({'bulk': 1})
             if episode[2] == 0:
+                url = service[1] + "/episodes/watched"
                 method = "DELETE"
                 act = "not watched"
                 actlang = 30015
+            elif episode[2] == -1:
+                url = service[1] + "/episodes/downloaded"
+                method = "POST"
+                act = "downloaded"
+                actlang = 30101
             else:
+                url = service[1] + "/episodes/watched"
                 method = "POST"
                 act = "watched"
                 actlang = 30014
@@ -353,6 +359,10 @@ class MyPlayer(xbmc.Monitor):
                             log("episode status changed for library id = %s, playcount = %s" % (result['item']['id'], result['playcount']))
                             episode = self._get_episode_info( result['item']['id'], result['playcount'], self.Play)
                             if episode:
+                                if result['playcount']==0:
+                                    # mark as downloaded
+                                    episode[2]=-1
+                                    self.action(episode, self.service)
                                 # mark as watched or not, depending on playcount
                                 self.action(episode, self.service)
                                 self.Play = False
@@ -363,7 +373,15 @@ class MyPlayer(xbmc.Monitor):
                                 # mark as watched or not, depending on playcount
                                 self.action(movie, self.service)
                                 self.Play = False
-
+                # elif 'item' in result:
+                    # if result['item']['type'] == 'episode':
+                        # log("episode update library id = %s" % (result['item']['id']))
+                        # episode = self._get_episode_info( result['item']['id'], result['playcount'], self.Play)
+                        # if episode:
+                            # mark as downloaded
+                            # episode[2]=-1
+                            # self.action(episode, self.service)
+                            # self.Play = False
     def _get_episode_info( self, episodeid, playcount, playstatus ):
         try:
             tvshow_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"episodeid": ' + str(episodeid) + ', "properties": ["tvshowid", "showtitle", "season", "episode", "uniqueid"]}, "id": 1}'

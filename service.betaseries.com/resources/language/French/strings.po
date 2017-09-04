@@ -80,6 +80,10 @@ msgctxt "#30017"
 msgid "Movie marked as not watched !"
 msgstr "Film marqué comme non vu !"
 
+msgctxt "#30101"
+msgid "Episode marked as downloaded !"
+msgstr "Episode marqué récupéré !"
+
 msgctxt "#32001"
 msgid "Authentication error"
 msgstr "Erreur d'authentification"
