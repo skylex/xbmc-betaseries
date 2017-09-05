@@ -84,6 +84,10 @@ msgstr ""
 
 #empty strings from id 30018 to 32000
 
+msgctxt "#30101"
+msgid "Episode marked as downloaded !"
+msgstr ""
+
 msgctxt "#32001"
 msgid "Authentication error"
 msgstr ""
