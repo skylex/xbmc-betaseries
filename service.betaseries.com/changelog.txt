@@ -1,5 +1,4 @@
 1.0.8
-- Mark episodes as downloaded on library update
 - allow marking movies
 
 1.0.7

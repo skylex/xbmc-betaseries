@@ -9,7 +9,7 @@
 		<summary lang="en">Synchronization with BetaSeries.com</summary>
 		<summary lang="fr">Synchronisation avec BetaSeries.com</summary>
 		<description lang="en">This service automatically updates your profile on BetaSeries.com when you have finished watching an episode or a movie on Kodi</description>
-		<description lang="fr">Ce service met à jour automatiquement votre profil sur le site BetaSeries.com lorsque vous venez de finir de regarder un épisode ou un film dans Kodi</description>
+		<description lang="fr">Ce service met à jour automatiquement votre profil sur le site BetaSeries.com lorsque vous venez de finir de regarder un épisode ou nu film dans Kodi</description>
 		<language></language>
 		<platform>all</platform>
 		<source>http://www.betaseries.com/wiki/Plugin%20XBMC</source>

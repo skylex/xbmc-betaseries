@@ -183,7 +183,7 @@ class Main:
             return service  
         if episode[6]=='episode':
             # follow show if BetaFollow = true
-            if service[14]:
+            if service[14] and episode[2] != -1:
                 url = service[1] + "/shows/show"
                 urldata = {'v':self.apiver, 'key':service[2], 'token':service[6], 'thetvdb_id':episode[0]}
                 try:
@@ -306,10 +306,13 @@ class MyPlayer(xbmc.Monitor):
         self.service = kwargs['service']
         self.Play = False
         log('Player Class Init')
+        self.ScanRecentlyadded()
 
     def onNotification( self, sender, method, data ):
         if sender == 'xbmc':
-            if method == 'Player.OnPlay':
+            if method == 'VideoLibrary.OnScanFinished':
+                self.ScanRecentlyadded()
+            elif method == 'Player.OnPlay':
                 result = json.loads(data)
                 if 'item' in result:
                     if result['item']['type'] == 'episode':
@@ -373,15 +376,41 @@ class MyPlayer(xbmc.Monitor):
                                 # mark as watched or not, depending on playcount
                                 self.action(movie, self.service)
                                 self.Play = False
-                # elif 'item' in result:
-                    # if result['item']['type'] == 'episode':
-                        # log("episode update library id = %s" % (result['item']['id']))
-                        # episode = self._get_episode_info( result['item']['id'], result['playcount'], self.Play)
-                        # if episode:
-                            # mark as downloaded
-                            # episode[2]=-1
-                            # self.action(episode, self.service)
-                            # self.Play = False
+    
+    def  ScanRecentlyadded ( self):
+        f =  __addon__.getAddonInfo('path') + '/lastdate.tmp'
+        try:
+            with open (f,"r") as fic:
+                lastdate = fic.read()
+            
+        except:
+            lastdate = '2001-01-01 00:00:00'
+        newdate = lastdate
+        # result_movies = json.loads(xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "VideoLibrary.GetRecentlyAddedMovies", "params": {"properties": ["dateadded"]}, "id": 1 }'))
+        # if 'result' in result_movies:
+            # log("VideoLirary GetRecentlyAddedMovies : %s" % result_movies['result']['movies'])
+            # for movie in result_movies['result']['movies']:
+                # log("id %s has been added %s" % (movie['movieid'],movie['dateadded']))
+        # else:
+            # log("VideoLirary GetRecentlyAddedMovies in ERROR : %s" % result_movies)
+        result_episodes = json.loads(xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "VideoLibrary.GetRecentlyAddedEpisodes", "params": {"properties": ["dateadded"]}, "id": 1 }'))
+        if 'result' in result_episodes:
+            # log("VideoLirary GetRecentlyAddedEpisodes : %s" % result_episodes['result']['episodes'])
+            for episode in result_episodes['result']['episodes']:
+                 if episode['dateadded'] > lastdate:
+                    if episode['dateadded'] > newdate:
+                        newdate = episode['dateadded']
+                    log("%s with id %s has been added %s" % (episode['label'],episode['episodeid'],episode['dateadded']))
+                    episode = self._get_episode_info( episode['episodeid'], -1, self.Play)
+                    episode[2]=-1
+                    self.action(episode, self.service)
+            with open (f,'wb') as fic:
+                fic.write(newdate)
+        else:
+            log("VideoLirary GetRecentlyAddedEpisodes in ERROR : %s" % result_episodes)
+        
+        
+        
     def _get_episode_info( self, episodeid, playcount, playstatus ):
         try:
             tvshow_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"episodeid": ' + str(episodeid) + ', "properties": ["tvshowid", "showtitle", "season", "episode", "uniqueid"]}, "id": 1}'
@@ -473,3 +502,4 @@ if ( __name__ == "__main__" ):
     log('script version %s started' % __addonversion__)
     __useragent__ = set_user_agent()
     Main()
+
