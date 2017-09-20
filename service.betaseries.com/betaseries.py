@@ -217,6 +217,8 @@ class Main:
         urldata = {'v':self.apiver, 'key':service[2], 'token':service[6], 'thetvdb_id':episode[1]}
         if service[11]:
             urldata.update({'bulk': 1})
+        else
+            urldata.update({'bulk': 0})
         if episode[2] == 0:
             method = "DELETE"
             act = "not watched"
