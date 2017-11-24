@@ -15,24 +15,7 @@
 	</extension>
 </addon>
 
-<addon id="service.betaseries" name="BetaSeries Service" version="1.0.4" provider-name="skylex">
-	<requires>
-		<import addon="xbmc.python" version="2.12.0" />
-		<import addon="script.module.simplejson" version="2.0.10" />
-	</requires>
-	<extension point="xbmc.service" library="betaseries.py" start="login" />
-	<extension point="xbmc.addon.metadata">
-		<summary lang="en">Synchronization with BetaSeries.com</summary>
-		<summary lang="fr">Synchronisation avec BetaSeries.com</summary>
-		<description lang="en">Obsolete, please install BetaSeries Agent instead</description>
-		<description lang="fr">Obsolète, veuillez installer BetaSeries Agent plutôt</description>
-		<language></language>
-		<platform>all</platform>
-		<source>http://www.betaseries.com/wiki/Plugin%20XBMC</source>
-	</extension>
-</addon>
-
-<addon id="service.betaseries.com" name="BetaSeries Agent" version="1.0.8" provider-name="skylex">
+<addon id="service.betaseries.com" name="BetaSeries Agent" version="1.0.9" provider-name="skylex">
 	<requires>
 		<import addon="xbmc.python" version="2.12.0" />
 		<import addon="script.module.simplejson" version="2.0.10" />

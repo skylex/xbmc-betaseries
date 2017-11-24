@@ -1,8 +1,11 @@
+1.0.9
+- version bump for some fixes
+
 1.0.8
 - allow marking movies
 
 1.0.7
-- 
+- support for movies
 
 1.0.6
 - allow marking episode when in file mode
