@@ -412,6 +412,8 @@ class MyPlayer(xbmc.Monitor):
         
         
     def _get_episode_info( self, episodeid, playcount, playstatus ):
+        tvdbid = False
+        tvdbepid = False
         try:
             tvshow_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"episodeid": ' + str(episodeid) + ', "properties": ["tvshowid", "showtitle", "season", "episode", "uniqueid"]}, "id": 1}'
             tvshow = json.loads(xbmc.executeJSONRPC (tvshow_query))['result']['episodedetails']
