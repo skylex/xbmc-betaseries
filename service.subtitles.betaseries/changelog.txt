@@ -1,3 +1,6 @@
+1.0.8
+- fix issue #17
+
 1.0.7
 - fixed rmtree with accents
 

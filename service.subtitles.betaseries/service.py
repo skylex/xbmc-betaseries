@@ -221,7 +221,11 @@ def search_subtitles(search):
                 # get betaseries show id from tvdbid
                 tvdbid = tvdbid_result['result']['tvshowdetails']['imdbnumber']
                 showurl = "%s/shows/display?thetvdb_id=%s&key=%s&v=%s" % (self_host, tvdbid, self_apikey, self_apiver)
-                showid = json.loads(get_url(showurl))["show"]["id"]
+                try:
+                    showid = json.loads(get_url(showurl))["show"]["id"]
+                except:
+                    log("could not parse data or fetch url for showid, cannot continue")
+                    return False
                 log("after showid = %s" % (showid))
                 # then get betaseries episode id
                 episodeurl = "%s/episodes/search?show_id=%s&number=S%#02dE%#02d&key=%s&v=%s" % (self_host, showid, int(search['season']), int(search['episode']), self_apikey, self_apiver)
