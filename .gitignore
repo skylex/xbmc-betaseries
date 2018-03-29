@@ -2,3 +2,4 @@
 update_repository.py
 /service.betaseries.com/lastdate.tmp
 /.vs
+*.sh

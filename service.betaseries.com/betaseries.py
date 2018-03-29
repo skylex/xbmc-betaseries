@@ -402,8 +402,9 @@ class MyPlayer(xbmc.Monitor):
                         newdate = episode['dateadded']
                     log("%s with id %s has been added %s" % (episode['label'],episode['episodeid'],episode['dateadded']))
                     episode = self._get_episode_info( episode['episodeid'], -1, self.Play)
-                    episode[2]=-1
-                    self.action(episode, self.service)
+                    if episode and type(episode) is list
+                        episode[2]=-1
+                        self.action(episode, self.service)
             with open (f,'wb') as fic:
                 fic.write(newdate)
         else:
