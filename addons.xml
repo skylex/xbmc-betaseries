@@ -30,7 +30,7 @@
 	</extension>
 </addon>
 
-<addon id="service.betaseries.com" name="BetaSeries Agent" version="1.0.11" provider-name="skylex">
+<addon id="service.betaseries.com" name="BetaSeries Agent" version="1.0.12" provider-name="skylex">
 	<requires>
 		<import addon="xbmc.python" version="2.12.0" />
 		<import addon="script.module.simplejson" version="2.0.10" />
