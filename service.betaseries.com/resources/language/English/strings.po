@@ -82,6 +82,12 @@ msgctxt "#30017"
 msgid "Movie marked as not watched !"
 msgstr ""
 
+msgctxt "#30018"
+msgid "Verbose logging"
+
+msgctxt "#30019"
+msgid "Update episodes seen from BS at each start"
+
 #empty strings from id 30018 to 32000
 
 msgctxt "#30101"
