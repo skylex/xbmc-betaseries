@@ -88,6 +88,9 @@ msgid "Verbose logging"
 msgctxt "#30019"
 msgid "Update episodes seen from BS at each start"
 
+msgctxt "#30020"
+msgid "Mark recently added file as downloaded on BS at each start"
+
 #empty strings from id 30018 to 32000
 
 msgctxt "#30101"

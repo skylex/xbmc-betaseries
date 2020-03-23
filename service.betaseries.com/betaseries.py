@@ -105,10 +105,11 @@ class Main:
 		BetaFollow = __addon__.getSetting('betafollow') == 'true'
 		BetaNotify = __addon__.getSetting('betanotify') == 'true'
 		BetaUpdate  = __addon__.getSetting('betaupdate') == 'true'
+		BetaDlded = __addon__.getSetting('betadlded') == 'true'
 		debugMode = __addon__.getSetting('betaverbose') == 'true'
 		if BetaActive and BetaUser and BetaPass:
 			# [service, api-url, api-key, user, pass, first-only, token, auth-fail, failurecount, timercounter, timerexpiretime, bulk, mark, unmark, follow]
-			service = ['betaseries', self.apiurl, self.apikey, BetaUser, BetaPass, BetaFirst, '', False, 0, 0, 0, BetaBulk, BetaMark, BetaUnMark, BetaFollow, BetaNotify, BetaUpdate]
+			service = ['betaseries', self.apiurl, self.apikey, BetaUser, BetaPass, BetaFirst, '', False, 0, 0, 0, BetaBulk, BetaMark, BetaUnMark, BetaFollow, BetaNotify, BetaUpdate, BetaDlded]
 			
 			self.Player = MyPlayer(action = self._service_betaserie, service = service)
 			if service[15]:
@@ -197,7 +198,8 @@ class Main:
 			return service  
 		if episode[6]=='episode':
 			# follow show if BetaFollow = true
-			if service[14] and episode[2] != -1:
+			# if service[14] and episode[2] != -1:
+			if service[14] and not episode[10]:
 				url = service[1] + "/shows/show"
 				urldata = {'v':self.apiver, 'key':service[2], 'token':service[6], 'thetvdb_id':episode[0]}
 				try:
@@ -285,11 +287,11 @@ class Main:
 				else:
 					actlang = 32006
 				xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(actlang), 750, __icon__)).encode('utf-8', 'ignore'))
-				log('error marking %s %s as %s' % (episode[6],episode[5], act), xbmc.LOGNOTICE)
+				log('error marking %s %s as %s' % (episode[4],episode[5], act), xbmc.LOGNOTICE)
 		else:
 			if service[15]:
 				xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(actlang), 750, __icon__)).encode('utf-8', 'ignore'))
-			log('%s %s %s marked as %s' % (episode[4], episode[6], episode[5], act))
+			log('%s %s %s marked as %s' % (episode[4], episode[4], episode[5], act))
 		return service
 
 	def _service_fail( self, service, timer ):
@@ -319,20 +321,22 @@ class MyPlayer(xbmc.Monitor):
 		self.service = kwargs['service']
 		self.Play = False
 		log('Player Class Init')
+		# cherche les episodes ajoute sur ce player et ajoute sur BS
+		if self.service[17]:
+			self.ScanRecentlyadded()
 		# cherche sur BS si un episode a ete marque sur un autre player
 		if self.service[16]:
 			self.ScanBSMarkedEpisode()
-		# cherche les episodes ajoute sur ce player et ajoute sur BS
-		self.ScanRecentlyadded()
 
 	def onNotification( self, sender, method, data ):
 		if sender == 'xbmc':
 			if method == 'VideoLibrary.OnScanFinished':
+				# cherche les episodes ajoute sur ce player et ajoute sur BS
+				if self.service[17]:
+					self.ScanRecentlyadded()
 				# cherche sur BS si un episode a ete marque sur un autre player
 				if self.service[16]:
 					self.ScanBSMarkedEpisode()
-				# cherche les episodes ajoute sur ce player et ajoute sur BS
-				self.ScanRecentlyadded()
 			elif method == 'Player.OnPlay':
 				result = json.loads(data)
 				if 'item' in result:
@@ -380,7 +384,7 @@ class MyPlayer(xbmc.Monitor):
 					if 'item' in result:
 						if result['item']['type'] == 'episode':
 							log("episode status changed for library id = %s, playcount = %s" % (result['item']['id'], result['playcount']))
-							episode = self._get_episode_info( result['item']['id'], result['playcount'], self.Play, True)
+							episode = self._get_episode_info( result['item']['id'], result['playcount'], self.Play)
 							if episode:
 								if result['playcount']==0:
 									# mark as downloaded
@@ -420,7 +424,7 @@ class MyPlayer(xbmc.Monitor):
 						continue
 					if not seen:
 						# si pas vu, regarder sur BS si marque
-						episode = self._get_episode_info( episode['episodeid'], -1, self.Play, True)
+						episode = self._get_episode_info( episode['episodeid'], -1, self.Play)
 						if episode and type(episode) is list:
 							if episode[7] != 1 and episode[8]:
 								if not self.service[6]:
@@ -464,16 +468,17 @@ class MyPlayer(xbmc.Monitor):
 						if episode['dateadded'] > newdate:
 							newdate = episode['dateadded']
 						log("%s with id %s has been added %s" % (episode['label'],episode['episodeid'],episode['dateadded']))
-						episode = self._get_episode_info( episode['episodeid'], -1, self.Play, False)
+						episode = self._get_episode_info( episode['episodeid'], -1, self.Play)
 						if episode and type(episode) is list:
-							episode[2]=-1
-							self.action(episode, self.service)
+							if not episode[9]:
+								episode[2]=-1
+								self.action(episode, self.service)
 				with open (f,'wb') as fic:
 					fic.write(newdate)
 		else:
 			log("VideoLibrary GetRecentlyAddedEpisodes in ERROR : %s" % result_episodes)
 
-	def _get_episode_info( self, episodeid, playcount, playstatus, hasSeen):
+	def _get_episode_info( self, episodeid, playcount, playstatus):
 		tvdbid = False
 		tvdbepid = False
 		logstr = ""
@@ -513,6 +518,7 @@ class MyPlayer(xbmc.Monitor):
 					tvdbid_query = get_urldata(url + urldata, '', "GET")
 					tvdbid_query = json.loads(tvdbid_query)
 					tvdbid = tvdbid_query['show']['thetvdb_id']
+					
 					logstr += (' convert to %s ' % (tvdbid))
 				except:
 					log(logstr , xbmc.LOGNOTICE)
@@ -531,13 +537,28 @@ class MyPlayer(xbmc.Monitor):
 				log(logstr , xbmc.LOGNOTICE)
 				log("could not fetch tvshow's thetvdb_id for " + showtitle, xbmc.LOGERROR)
 				return False
+
+		follow = False
+		# Auth : send episode vide
+		if not self.service[6]:
+			self.action([0], self.service)
+		url = self.service[1] + '/shows/display'
+		urldata = '?v=2.2&key=' + self.service[2] + '&token=' + self.service[6] + '&thetvdb_id=' + str(tvdbid)
+		try:
+			tvdbid_query = get_urldata(url + urldata, '', "GET")
+			tvdbid_query = json.loads(tvdbid_query)
+			follow = tvdbid_query['show']['in_account']
+			logstr += ('follow status: %s' % ( str(tvdbid_query['show']['in_account']) ))
+		except:
+			log(logstr , xbmc.LOGNOTICE)
+			log("could not get follow tvshow's status for " + showtitle, xbmc.LOGERROR)
+
 		if (tvdbepid):
 			if (tvdbepid).startswith("tt"):
 				tvdbepid = False
 		if not tvdbepid:
 			url = self.service[1] + '/shows/episodes'
-			urldata = '?v=2.2&key=' + self.service[2] + '&thetvdb_id=' + str(tvdbid) + '&season=' + str(tvshow['season']) + '&episode=' + str(tvshow['episode'])
-			# log("url:"+urldata)
+			urldata = '?v=2.2&key=' + self.service[2] + '&thetvdb_id=' + str(tvdbid) + '&season=' + str(tvshow['season']) + '&episode=' + str(tvshow['episode'])			
 			try:
 				tvdbepid_query = get_urldata(url + urldata, '', "GET")
 				tvdbepid_query = json.loads(tvdbepid_query)
@@ -548,26 +569,23 @@ class MyPlayer(xbmc.Monitor):
 				log("could not fetch episode's thetvdb_id for " + showtitle + "-" + epname, xbmc.LOGERROR)
 				return False
 		seen=False
-		if (hasSeen):
-			if tvshow['playcount'] != 1:
-				# Auth : send episode vide
-				if not self.service[6]:
-					self.action([0], self.service)
-				url = self.service[1] + '/episodes/display'
-				urldata = '?v=2.2&key=' + self.service[2] + '&token=' + self.service[6] + '&thetvdb_id=' + str(tvdbepid)
-				# log("url:"+urldata, xbmc.LOGNOTICE)
-				try:
-					seen_query = get_urldata(url + urldata, "", "GET")
-					seen_query = json.loads(seen_query)
-					seen = seen_query['episode']['user']['seen']
-					# log("return :"+str(seen_query) , xbmc.LOGNOTICE)
-					# log('seen %s %s : %s' % (showtitle, epname, seen) , xbmc.LOGNOTICE)
-				except:
-					log(logstr , xbmc.LOGNOTICE)
-					log('failed to get status for %s' % showtitle, xbmc.LOGERROR)
-					return False
+		dl=False
+		if tvshow['playcount'] != 1:
+			url = self.service[1] + '/episodes/display'
+			urldata = '?v=2.2&key=' + self.service[2] + '&token=' + self.service[6] + '&thetvdb_id=' + str(tvdbepid)
+			try:
+				seen_query = get_urldata(url + urldata, "", "GET")
+				seen_query = json.loads(seen_query)
+				seen = seen_query['episode']['user']['seen']
+				dl = seen_query['episode']['user']['downloaded']
+				# log("return :"+str(seen_query) , xbmc.LOGNOTICE)
+				# log('seen %s %s : %s' % (showtitle, epname, seen) , xbmc.LOGNOTICE)
+			except:
+				log(logstr , xbmc.LOGNOTICE)
+				log('failed to get status for %s' % showtitle, xbmc.LOGERROR)
+				return False
 		log(logstr)
-		epinfo = [int(tvdbid), int(tvdbepid), int(playcount), bool(playstatus), showtitle, epname, 'episode', tvshow['playcount'], bool(seen)]
+		epinfo = [int(tvdbid), int(tvdbepid), int(playcount), bool(playstatus), showtitle, epname, 'episode', tvshow['playcount'], bool(seen), bool(dl), bool(follow)]
 		return epinfo
 
 	def _get_movie_info( self, episodeid, playcount, playstatus ):
