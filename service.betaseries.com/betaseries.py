@@ -409,7 +409,7 @@ class MyPlayer(xbmc.Monitor):
 					ep_id = episode['episodeid']
 					seen = False
 					try:
-						# test chaque episode si marqué vu
+						# test chaque episode si marque vu
 						tvshow_query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"episodeid": ' + str(ep_id) + ', "properties": ["playcount"]}, "id": 1}'
 						tvshow = json.loads(xbmc.executeJSONRPC (tvshow_query))['result']['episodedetails']
 						if tvshow['playcount'] > 0:
@@ -419,7 +419,7 @@ class MyPlayer(xbmc.Monitor):
 						# passe au suivant si erreur
 						continue
 					if not seen:
-						# si pas vu, regarder sur BS si marqué
+						# si pas vu, regarder sur BS si marque
 						episode = self._get_episode_info( episode['episodeid'], -1, self.Play, True)
 						if episode and type(episode) is list:
 							if episode[7] != 1 and episode[8]:
