@@ -426,7 +426,7 @@ class MyPlayer(xbmc.Monitor):
 						# si pas vu, regarder sur BS si marque
 						episode = self._get_episode_info( episode['episodeid'], -1, self.Play)
 						if episode and type(episode) is list:
-							if episode[7] != 1 and episode[8]:
+							if episode[7] < 1 and episode[8]:
 								if not self.service[6]:
 									# Verifie si connecte; [0] = episode vide
 									self.action([0], self.service)
@@ -548,7 +548,7 @@ class MyPlayer(xbmc.Monitor):
 			tvdbid_query = get_urldata(url + urldata, '', "GET")
 			tvdbid_query = json.loads(tvdbid_query)
 			follow = tvdbid_query['show']['in_account']
-			logstr += ('follow status: %s' % ( str(tvdbid_query['show']['in_account']) ))
+			logstr += (' follow status: %s' % ( str(follow) ))
 		except:
 			log(logstr , xbmc.LOGNOTICE)
 			log("could not get follow tvshow's status for " + showtitle, xbmc.LOGERROR)
@@ -570,7 +570,7 @@ class MyPlayer(xbmc.Monitor):
 				return False
 		seen=False
 		dl=False
-		if tvshow['playcount'] != 1:
+		if tvshow['playcount'] < 1:
 			url = self.service[1] + '/episodes/display'
 			urldata = '?v=2.2&key=' + self.service[2] + '&token=' + self.service[6] + '&thetvdb_id=' + str(tvdbepid)
 			try:
@@ -578,6 +578,7 @@ class MyPlayer(xbmc.Monitor):
 				seen_query = json.loads(seen_query)
 				seen = seen_query['episode']['user']['seen']
 				dl = seen_query['episode']['user']['downloaded']
+				logstr += (' dl status: %s seen status: %s' % ( str(dl), str(seen)))
 				# log("return :"+str(seen_query) , xbmc.LOGNOTICE)
 				# log('seen %s %s : %s' % (showtitle, epname, seen) , xbmc.LOGNOTICE)
 			except:
