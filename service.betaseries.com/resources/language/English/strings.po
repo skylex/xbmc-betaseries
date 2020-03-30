@@ -91,6 +91,9 @@ msgid "Update episodes seen from BS at each start"
 msgctxt "#30020"
 msgid "Mark recently added file as downloaded on BS at each start"
 
+msgctxt "#30021"
+msgid "%s episode(s) marked as watched"
+
 #empty strings from id 30018 to 32000
 
 msgctxt "#30101"
@@ -124,3 +127,9 @@ msgstr ""
 msgctxt "#32007"
 msgid "Failed to mark movie !"
 msgstr ""
+
+msgctxt "#32008"
+msgid "Authentication succeeded"
+
+msgctxt "#32009"
+msgid "Authentication failed"

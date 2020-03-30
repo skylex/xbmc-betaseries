@@ -1,5 +1,13 @@
+1.0.14
+- add compatibility with Netflix addon
+- add compatibility with Catchuptv addon
+- add pseudo compatibility with themoviedb (not recommended)
+- fix search from title
+- add some traductions
+- API v3.0 
+
 1.0.13
-- convert from imbd_id in tvdb_id
+- convert from imbd_id to tvdb_id
 - add auto-update from BS
 
 1.0.12

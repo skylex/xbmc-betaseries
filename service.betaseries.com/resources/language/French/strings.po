@@ -92,6 +92,10 @@ msgctxt "#30020"
 msgid "Mark recently added file as downloaded on BS at each start"
 msgstr "Note les fichiers récents comme téléchargés sur BS à chaque démarrage"
 
+msgctxt "#30021"
+msgid "%s episode(s) marked as watched"
+msgstr "%s episode(s) marqué(s) comme vu !"
+
 msgctxt "#30101"
 msgid "Episode marked as downloaded !"
 msgstr "Episode marqué récupéré !"
@@ -123,3 +127,11 @@ msgstr "Erreur lors du marquage de l'épisode !"
 msgctxt "#32007"
 msgid "Failed to mark movie !"
 msgstr "Erreur lors du marquage du film !"
+
+msgctxt "#32008"
+msgid "Authentication succeeded"
+msgstr "Authentification réussie"
+
+msgctxt "#32009"
+msgid "Authentication failed"
+msgstr "Echec d'authentification"
