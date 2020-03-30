@@ -12,6 +12,15 @@
 		<description lang="fr">Ce service synchronise automatiquement votre profil BetaSeries.com et votre base XBMC/Kodi</description>
 		<language></language>
 		<platform>all</platform>
-		<source>http://www.betaseries.com/wiki/Plugin%20XBMC</source>
+			<source>https://support.betaseries.com/article/38-les-applications-betaseries</source>
+		  <news>
+	v1.0.14 (2020/03/30)
+	  - add compatibility with Netflix addon
+	  - add compatibility with Catchuptv addon
+	  - add pseudo compatibility with themoviedb (not recommended)
+	  - fix search from title
+	  - add some traductions
+	  - change to Betaseries API v3.0 
+		  </news>	
 	</extension>
 </addon>
