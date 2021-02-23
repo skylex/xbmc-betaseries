@@ -1,0 +1,144 @@
+# 0101 Revoir la méthode à employer pour les traductions"
+# KODI Media Center language file
+# Addon Name: BetaSeries Service
+# Addon id: service.betaseries
+# Addon Provider: kugan49
+msgid ""
+msgstr ""
+"Project-Id-Version: KODI Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@KODI.org\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: KODI Translation Team\n"
+"Language-Team: French (http://www.transifex.com/projects/p/KODI-addons/language/fr/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgctxt "#30000"
+msgid "General"
+msgstr "Général"
+
+msgctxt "#30003"
+msgid "Successfully loaded !"
+msgstr "Chargé avec succès !"
+
+msgctxt "#30004"
+msgid "Activate BetaSeries.com service"
+msgstr "Activer le service BetaSeries.com"
+
+msgctxt "#30005"
+msgid "Mark as viewed only when watched for the first time"
+msgstr "Marquer comme vu seulement après la première lecture"
+
+msgctxt "#30006"
+msgid "BetaSeries.com username"
+msgstr "Nom d'utilisateur BetaSeries.com"
+
+msgctxt "#30007"
+msgid "BetaSeries.com password"
+msgstr "Mot de passe BetaSeries.com"
+
+msgctxt "#30008"
+msgid "Mark previous episodes as watched"
+msgstr "Marquer les épisodes précédents comme vus"
+
+msgctxt "#30009"
+msgid "Update status when marking as viewed in KODI"
+msgstr "Mettre à jour quand l'épisode est marqué comme vu dans KODI"
+
+msgctxt "#30010"
+msgid "Update status when marking as not viewed in KODI"
+msgstr "Mettre à jour quand l'épisode est marqué comme non vu dans KODI"
+
+msgctxt "#30011"
+msgid "Automatically add new watched shows"
+msgstr "Ajouter automatiquement les nouvelles séries regardées"
+
+msgctxt "#30012"
+msgid "Notify on screen when marking episodes"
+msgstr "Notification visuelle lors du marquage d'un épisode"
+
+msgctxt "#30013"
+msgid "Show added : %s"
+msgstr "Série ajoutée : %s"
+
+msgctxt "#30014"
+msgid "Episode marked as watched !"
+msgstr "Episode marqué comme vu !"
+
+msgctxt "#30015"
+msgid "Episode marked as not watched !"
+msgstr "Episode marqué comme non vu !"
+
+msgctxt "#30016"
+msgid "Movie marked as watched !"
+msgstr "Film marqué comme vu !"
+
+msgctxt "#30017"
+msgid "Movie marked as not watched !"
+msgstr "Film marqué comme non vu !"
+
+msgctxt "#30018"
+msgid "Verbose logging"
+msgstr "Log verbeux"
+
+msgctxt "#30019"
+msgid "Update episodes seen from BS at each start"
+msgstr "Mettre à jour les épisodes marqués vus sur BS à chaque démarrage"
+
+msgctxt "#30020"
+msgid "Mark recently added file as downloaded on BS at each start"
+msgstr "Note les fichiers récents comme téléchargés sur BS à chaque démarrage"
+
+msgctxt "#30021"
+msgid "%s episode(s) marked as watched"
+msgstr "%s episode(s) marqué(s) comme vu !"
+
+msgctxt "#30101"
+msgid "Episode marked as downloaded !"
+msgstr "Episode marqué récupéré !"
+
+msgctxt "#32001"
+msgid "Authentication error"
+msgstr "Erreur d'authentification"
+
+msgctxt "#32002"
+msgid "bad communication with BetaSeries.com"
+msgstr "Problème de communication avec BetaSeries.com"
+
+msgctxt "#32003"
+msgid "Failed to connect to the site"
+msgstr "Erreur lors de la connexion au site"
+
+msgctxt "#32004"
+msgid "Login or password incorrect"
+msgstr "Identifiant ou mot de passe incorrect"
+
+msgctxt "#32005"
+msgid "Failed to add show : "
+msgstr "Erreur lors de l'ajout de la série : "
+
+msgctxt "#32006"
+msgid "Failed to mark episode !"
+msgstr "Erreur lors du marquage de l'épisode !"
+
+msgctxt "#32007"
+msgid "Failed to mark movie !"
+msgstr "Erreur lors du marquage du film !"
+
+msgctxt "#32008"
+msgid "Authentication succeeded"
+msgstr "Authentification réussie"
+
+msgctxt "#32009"
+msgid "Authentication failed"
+msgstr "Echec d'authentification"
+
+msgctxt "#32010"
+msgid "BetaSeries Agent"
+msgstr "Agent BetaSeries"
+
+

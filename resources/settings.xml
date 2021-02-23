@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- 0101 mettre au nouveau format -->
+<settings>
+	<category label="30000">
+		<setting id="betaactive" type="bool" label="30004" default="true"/>
+		<setting id="betauser" type="text" label="30006" default="" enable="eq(-1,true)"/>
+		<setting id="betapass" type="text" label="30007" default="" enable="eq(-2,true)" option="hidden"/>
+		<setting id="betafollow" type="bool" label="30011" default="true" enable="eq(-3,true)"/>
+		<setting id="betabulk" type="bool" label="30008" default="true" enable="eq(-4,true)"/>
+		<setting id="betamark" type="bool" label="30009" default="false" enable="eq(-5,true)"/>
+		<setting id="betaunmark" type="bool" label="30010" default="false" enable="eq(-6,true)"/>
+		<setting id="betafirst" type="bool" label="30005" default="false" enable="eq(-7,true)"/>
+		<setting id="betanotify" type="bool" label="30012" default="true" enable="eq(-8,true)"/>
+		<setting id="betaupdate" type="bool" label="30019" default="true" enable="eq(-9,true)"/>
+		<!-- <setting id="betadlded" type="bool" label="30020" default="false" enable="eq(-10,true)"/> -->
+		<setting id="betaverbose" type="bool" label="30018" default="false" enable="eq(-10,true)"/>
+	</category>
+</settings>
+
+
+<!-- <?xml version="1.0" ?>
+<settings version="1">
+	<section id="script.betaseries">
+		<category id="General" label="30000">			<!-- General -->
+<setting id="betaactive" type="bool" label="30004" default="true"/>
+<setting id="test08" type="boolean" label="32008" help="">
+	<level>0</level>
+	<default>true</default>
+	<control type="toggle"/>
+</setting>
+<setting id="betauser" type="string" label="30006" help="">
+	<level>0</level>
+	<default/>
+	<constraints>
+		<allowempty>false</allowempty>
+	</constraints>
+	<control type="edit" format="string">
+		<heading>30006</heading>
+	</control>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+
+
+<setting id="betapass" type="string" label="30007" help="">
+	<level>0</level>
+	<default/>
+	<constraints>
+		<allowempty>false</allowempty>
+	</constraints>
+	<control type="edit" format="string">
+		<heading>30007</heading>
+		<hidden>true</hidden>
+	</control>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+
+
+<setting id="betafollow" type="boolean" label="30011" help="">
+	<level>0</level>
+	<default>true</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+
+<setting id="betabulk" type="boolean" label="30008" help="">
+	<level>0</level>
+	<default>true</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+
+<setting id="betamark" type="boolean" label="30009" help="">
+	<level>0</level>
+	<default>false</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+
+<setting id="betaunmark" type="boolean" label="30010" help="">
+	<level>0</level>
+	<default>false</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+<setting id="betafirst" type="boolean" label="30005" help="">
+	<level>0</level>
+	<default>false</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+<setting id="betanotify" type="boolean" label="30012" help="">
+	<level>0</level>
+	<default>true</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+<setting id="betaupdate" type="boolean" label="30019" help="">
+	<level>0</level>
+	<default>true</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+
+<setting id="betaverbose" type="boolean" label="30018" help="">
+	<level>0</level>
+	<default>false</default>
+	<control type="toggle"/>
+	<dependencies>
+		<dependency type="enable" setting="betaactive">true</dependency>
+	</dependencies>
+</setting>
+
+</category>
+</section>
+</settings> -->
