@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.betaseries" name="BetaSeries Repository" version="1.0.1" provider-name="skylex modded by FG">
+	<extension point="xbmc.addon.repository" name="BetaSeries Add-on Repository">
+		<info compressed="false">https://raw.github.com/PCCV/xbmc-betaseries/master/addons.xml</info>
+		<checksum>https://raw.github.com/PCCV/xbmc-betaseries/master/addons.xml.md5</checksum>
+		<datadir zip="true">https://raw.github.com/PCCV/xbmc-betaseries/master</datadir>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary>BetaSeries Add-on Repository</summary>
+		<description lang="en">This repository contains the BetaSeries.com add-on for XBMC and maintains it up to date</description>
+		<description lang="fr">Ce dépôt contient l'extension BetaSeries.com pour XBMC et permet de la maintenir à jour</description>
+                <disclaimer>If it breaks, you get to keep the pieces</disclaimer>
+		<platform>all</platform>
+	</extension>
+</addon>

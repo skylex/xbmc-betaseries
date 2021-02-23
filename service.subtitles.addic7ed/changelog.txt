@@ -1,0 +1,26 @@
+1.0.8
+- option did not work properly
+
+1.0.7
+- small fix for last option label
+
+1.0.6
+- fixed rmtree with accents, added option to hide incomplete subtitles
+
+1.0.5
+- remove httplib usage
+
+1.0.4
+- add missing httplib in imports
+
+1.0.3
+- add some settings and localize things
+
+1.0.2
+- major corrections and optimizations
+
+1.0.1
+- minor corrections
+
+1.0.0
+- initial release

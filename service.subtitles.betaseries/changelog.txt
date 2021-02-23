@@ -1,0 +1,32 @@
+1.0.8
+- fix issue #17
+
+1.0.7
+- fixed rmtree with accents
+
+1.0.6
+- fix unicode, other fixes and big cleanup
+
+1.0.5
+- fix temp dir cleanup
+
+1.0.4
+- fix CC and zip langs
+
+1.0.3
+- small improvements and add data on ua
+
+1.0.2
+- improve sorting and a few things
+
+1.0.1
+- lang fix (ignore case)
+
+1.0.0
+- complete rewriting
+
+0.2
+- some changes
+
+0.1
+- initial release

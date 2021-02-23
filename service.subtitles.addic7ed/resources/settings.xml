@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<category label="30000">
+		<setting id="uifirst" type="bool" label="30004" default="true"/>
+		<setting id="ccfirst" type="bool" label="30005" default="false"/>
+		<setting id="dirsync" type="bool" label="30006" default="false"/>
+		<setting id="notify" type="bool" label="30007" default="false"/>
+		<setting id="hideinc" type="bool" label="30011" default="false"/>
+	</category>
+</settings>

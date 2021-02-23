@@ -1,8 +1,11 @@
-BetaSeries sync for Kodi
-==========================
+xbmc-betaseries
+===============
 
-Automatically update your Betaseries account from Kodi.
-Watching UnWatch or just added a movie or a TV episode and this add-on will update automatically into your betasseries account
+This is a Kodi repository for a few addons:
 
+- service.betaseries.com : addon to mark your episodes as watched on BetaSeries.com
+- service.subtitles.betaseries : Kodi subtitles addon to fetch subtitles from BetaSeries.com
+- service.subtitles.addic7ed : Kodi subtitles addon to fetch subtitles from addic7ed.com
+- service.subtitles.tvsubtitles : Kodi subtitles addon to fetch subtitles from tvsubtitles.com
 
-Thanks a lot to PCCV for the work they done : https://github.com/PCCV/xbmc-betaseries
+Enjoy!
