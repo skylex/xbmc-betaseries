@@ -13,7 +13,7 @@ from resources.lib import kodiUtilities
 from resources.lib.media import Media
 from resources.lib import globals
 
-__addon__ = xbmcaddon.Addon("script.betaseries")
+__addon__ = xbmcaddon.Addon("service.betaseries.com")
 logger = logging.getLogger(__name__)
 
 
@@ -205,46 +205,8 @@ class MyPlayer(xbmc.Monitor):
                                     "error: failed to mark watched or downloaded on Betaseries.com",
                                 )
             if counter > 0:
-                # xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (ADDON_NAME, ("Marked " + str(counter) + "episode(s) as watched"), 750, ADDON_ICON)).encode('utf-8', 'ignore'))
                 notification(getString(32010), getString(30021, str(counter)))
             else:
                 logger.info("Scan finished, all episodes updated")
             with open(f, "w") as fic:
                 fic.write(newdate)
-
-    # def ScanRecentlyadded(self):
-    #     """Do self.action on recently added media in kodi based on lastdate treatment"""
-    #     f = __addon__.getAddonInfo("path") + "/lastdate.tmp"
-    #     try:
-    #         with open(f, "r") as fic:
-    #             lastdate = fic.read()
-    #     except Exception:
-    #         lastdate = "2001-01-01 00:00:00"
-    #     newdate = lastdate
-    #     result_episodes = kodiUtilities.GetRecentlyAddedEpisodesFromKodi(
-    #         {"properties": ["dateadded"]}
-    #     )
-    #     if result_episodes:
-    #         logger.debug(
-    #             "Start scanning Kodi database for recent files and update BS for downloaded episode"
-    #         )
-    #         # logger.debug("VideoLirary GetRecentlyAddedEpisodes : %s" % result_episodes['result']['episodes'])
-    #         for episode in result_episodes:
-    #             if episode["dateadded"] > lastdate:
-    #                 if episode["dateadded"] > newdate:
-    #                     newdate = episode["dateadded"]
-    #                 logger.debug(
-    #                     f"{episode['label']} with id {episode['episodeid']} has been added {episode['dateadded']}"
-    #                 )
-    #                 episode = Media(episode["episodeid"], -1, self.Play).get_media_info(
-    #                     "episode"
-    #                 )
-    #                 if episode:
-    #                     if not episode["downloaded"]:
-    #                         logger.debug("call service")
-    #                         episode["playcount"] = -1
-    #                         self.action(episode, self.service)
-    #         with open(f, "w") as fic:
-    #             fic.write(newdate)
-    #     else:
-    #         logger.debug(f"GetRecentlyAddedEpisodesFromKodi ERROR : {result_episodes}")

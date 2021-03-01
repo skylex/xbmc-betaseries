@@ -12,7 +12,7 @@ import xbmc
 import xbmcaddon
 import platform
 
-__addon__ = xbmcaddon.Addon("script.betaseries")
+__addon__ = xbmcaddon.Addon("service.betaseries.com")
 logger = logging.getLogger(__name__)
 
 

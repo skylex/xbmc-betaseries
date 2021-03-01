@@ -183,8 +183,8 @@ class ServiceApi:
             "token": self.token,
             "order": "popularity",
             "summary": "true",
-            "starting": (showtitle.encode("ascii", "xmlcharrefreplace")).replace(
-                " ", "+"
+            "starting": showtitle.replace(" ", "+").encode(
+                "ascii", "xmlcharrefreplace"
             ),
         }
         logger.info(urldata)
@@ -365,7 +365,7 @@ class ServiceApi:
             "v": self.apiver,
             "key": self.apikey,
             "token": self.token,
-            "file": showtitle.encode("ascii", "xmlcharrefreplace").replace(" ", "+"),
+            "file": showtitle.replace(" ", "+").encode("ascii", "xmlcharrefreplace"),
         }
         logger.debug(urldata)
         try:
@@ -392,7 +392,7 @@ class ServiceApi:
             "v": self.apiver,
             "key": self.apikey,
             "token": self.token,
-            "file": showtitle.encode("ascii", "xmlcharrefreplace").replace(" ", "+"),
+            "file": showtitle.replace(" ", "+").encode("ascii", "xmlcharrefreplace"),
         }
         logger.debug(urldata)
         try:

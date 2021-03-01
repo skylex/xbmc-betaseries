@@ -20,7 +20,7 @@
 
 <!-- <?xml version="1.0" ?>
 <settings version="1">
-	<section id="script.betaseries">
+	<section id="service.betaseries.com">
 		<category id="General" label="30000">			<!-- General -->
 <setting id="betaactive" type="bool" label="30004" default="true"/>
 <setting id="test08" type="boolean" label="32008" help="">

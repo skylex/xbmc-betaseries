@@ -8,7 +8,7 @@ from resources.lib.service import betaseriesService
 from resources.lib.kodiUtilities import setSetting, getSetting
 from resources.lib.utilities import createError, checkIfNewVersion
 
-__addon__ = xbmcaddon.Addon("script.betaseries")
+__addon__ = xbmcaddon.Addon("service.betaseries.com")
 __addonversion__ = __addon__.getAddonInfo("version")
 __addonid__ = __addon__.getAddonInfo("id")
 kodilogging.config()
