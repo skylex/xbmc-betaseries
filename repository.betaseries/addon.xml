@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="repository.betaseries" name="BetaSeries Repository" version="1.0.1" provider-name="skylex modded by FG">
+<addon id="repository.betaseries" name="BetaSeries Repository" version="1.0.2" provider-name="skylex modded by FG">
 	<extension point="xbmc.addon.repository" name="BetaSeries Add-on Repository">
         <dir minversion="17.0.0">
 			<info compressed="false">https://raw.github.com/PCCV/xbmc-betaseries/leia/addons.xml</info>
