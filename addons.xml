@@ -30,6 +30,34 @@
 		</extension>
 	</addon>
 
+	<addon id="service.betaseries.com" name="BetaSeries Agent" version="2.0.0" provider-name="skylex modded by kugan49">
+		<requires>
+			<import addon="xbmc.python" version="3.0.0" />
+			<!-- 0101 pour débug -->
+			<!-- <import addon="script.module.web-pdb" /> -->
+		</requires>
+		<extension point="xbmc.service" library="default.py"/>
+		<extension point="xbmc.addon.metadata" name="betaseries.metadata">
+			<summary lang="en_US">Synchronization with BetaSeries.com</summary>
+			<summary lang="fr_FR">Synchronisation avec BetaSeries.com</summary>
+			<description lang="en_US">This service automatically updates your profile on BetaSeries.com when you have finished watching an episode or a movie or just uploaded it in on Kodi</description>
+			<description lang="fr_FR">Ce service met à jour automatiquement votre profil sur le site BetaSeries.com lorsque vous venez de finir de regarder un épisode ou un film dans Kodi ou que vous venez de l'ajouter</description>
+			<language></language>
+			<platform>all</platform>
+			<license> GPL-2.0-only</license>
+			<website>https://Betaseries.com</website>
+			<source>https://support.betaseries.com/article/38-les-applications-betaseries</source>
+			<news>
+				v2.0.0 (2021 02 23)
+				- refactoring for Kodi 19 Matrix
+			</news>
+			<assets>
+				<icon>icon.png</icon>
+				<fanart>fanart.png</fanart>
+			</assets>
+		</extension>
+	</addon>
+
 	<addon id="service.betaseries.com" name="BetaSeries Agent" version="1.0.14" provider-name="skylex modded by FG">
 		<requires>
 			<import addon="xbmc.python" version="2.12.0" />
@@ -44,15 +72,15 @@
 			<language></language>
 			<platform>all</platform>
 			<source>https://support.betaseries.com/article/38-les-applications-betaseries</source>
-		  <news>
-	v1.0.14 (2020/03/30)
-	  - add compatibility with Netflix addon
-	  - add compatibility with Catchuptv addon
-	  - add pseudo compatibility with themoviedb (not recommended)
-	  - fix search from title
-	  - add some traductions
-	  - change to Betaseries API v3.0 
-		  </news>	
+			<news>
+				v1.0.14 (2020/03/30)
+				- add compatibility with Netflix addon
+				- add compatibility with Catchuptv addon
+				- add pseudo compatibility with themoviedb (not recommended)
+				- fix search from title
+				- add some traductions
+				- change to Betaseries API v3.0 
+			</news>
 		</extension>
 	</addon>
 
@@ -70,26 +98,11 @@
 			<language></language>
 			<platform>all</platform>
 			<source>https://support.betaseries.com/article/38-les-applications-betaseries</source>
-		  <news>
-	v1.0.13 (2020/03/24)
-	  - convert from imbd_id to tvdb_id
-	  - add auto-update from BS
-		  </news>
-		</extension>
-	</addon>
-
-	<addon id="service.subtitles.addic7ed" name="Addic7ed" version="1.0.8" provider-name="skylex">
-		<requires>
-			<import addon="xbmc.python" version="2.1.0"/>
-			<import addon="script.module.beautifulsoup" version="3.2.1"/>
-		</requires>
-		<extension point="xbmc.subtitle.module" library="service.py" />
-		<extension point="xbmc.addon.metadata">
-			<platform>all</platform>
-			<summary lang="en">Addic7ed subtitles service</summary>
-			<summary lang="fr">Service de sous-titres Addic7ed</summary>
-			<description lang="en">Search and download subtitles from Addic7ed.com</description>
-			<description lang="fr">Rechercher et télécharger des sous-titres depuis Addic7ed.com</description>
+			<news>
+				v1.0.13 (2020/03/24)
+				- convert from imbd_id to tvdb_id
+				- add auto-update from BS
+			</news>
 		</extension>
 	</addon>
 
@@ -103,7 +116,7 @@
 			<summary>BetaSeries Add-on Repository</summary>
 			<description lang="en">This repository contains the BetaSeries.com add-on for XBMC and maintains it up to date</description>
 			<description lang="fr">Ce dépôt contient l'extension BetaSeries.com pour XBMC et permet de la maintenir à jour</description>
-					<disclaimer>If it breaks, you get to keep the pieces</disclaimer>
+			<disclaimer>If it breaks, you get to keep the pieces</disclaimer>
 			<platform>all</platform>
 		</extension>
 	</addon>

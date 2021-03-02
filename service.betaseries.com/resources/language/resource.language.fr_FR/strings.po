@@ -1,15 +1,16 @@
-# XBMC Media Center language file
+# 0101 Revoir la méthode à employer pour les traductions"
+# KODI Media Center language file
 # Addon Name: BetaSeries Service
 # Addon id: service.betaseries
-# Addon Provider: skylex
+# Addon Provider: kugan49
 msgid ""
 msgstr ""
-"Project-Id-Version: XBMC Addons\n"
-"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"Project-Id-Version: KODI Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@KODI.org\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: XBMC Translation Team\n"
-"Language-Team: French (http://www.transifex.com/projects/p/xbmc-addons/language/fr/)\n"
+"Last-Translator: KODI Translation Team\n"
+"Language-Team: French (http://www.transifex.com/projects/p/KODI-addons/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -45,12 +46,12 @@ msgid "Mark previous episodes as watched"
 msgstr "Marquer les épisodes précédents comme vus"
 
 msgctxt "#30009"
-msgid "Update status when marking as viewed in XBMC"
-msgstr "Mettre à jour quand l'épisode est marqué comme vu dans XBMC"
+msgid "Update status when marking as viewed in KODI"
+msgstr "Mettre à jour quand l'épisode est marqué comme vu dans KODI"
 
 msgctxt "#30010"
-msgid "Update status when marking as not viewed in XBMC"
-msgstr "Mettre à jour quand l'épisode est marqué comme non vu dans XBMC"
+msgid "Update status when marking as not viewed in KODI"
+msgstr "Mettre à jour quand l'épisode est marqué comme non vu dans KODI"
 
 msgctxt "#30011"
 msgid "Automatically add new watched shows"
@@ -61,8 +62,8 @@ msgid "Notify on screen when marking episodes"
 msgstr "Notification visuelle lors du marquage d'un épisode"
 
 msgctxt "#30013"
-msgid "Show added : "
-msgstr "Série ajoutée : "
+msgid "Show added : %s"
+msgstr "Série ajoutée : %s"
 
 msgctxt "#30014"
 msgid "Episode marked as watched !"
@@ -105,8 +106,8 @@ msgid "Authentication error"
 msgstr "Erreur d'authentification"
 
 msgctxt "#32002"
-msgid "Please update the add-on"
-msgstr "Veuillez mettre à jour l'extension"
+msgid "bad communication with BetaSeries.com"
+msgstr "Problème de communication avec BetaSeries.com"
 
 msgctxt "#32003"
 msgid "Failed to connect to the site"
@@ -135,3 +136,9 @@ msgstr "Authentification réussie"
 msgctxt "#32009"
 msgid "Authentication failed"
 msgstr "Echec d'authentification"
+
+msgctxt "#32010"
+msgid "BetaSeries Agent"
+msgstr "Agent BetaSeries"
+
+

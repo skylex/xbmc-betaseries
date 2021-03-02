@@ -9,127 +9,135 @@ msgstr ""
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: XBMC Translation Team\n"
-"Language-Team: English (http://www.transifex.com/projects/p/xbmc-addons/language/en/)\n"
+"Language-Team: French (http://www.transifex.com/projects/p/xbmc-addons/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: en\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 msgctxt "#30000"
 msgid "General"
-msgstr ""
-
-#empty strings from id 30001 to 30002
+msgstr "General"
 
 msgctxt "#30003"
 msgid "Successfully loaded !"
-msgstr ""
+msgstr "Successfully loaded !"
 
 msgctxt "#30004"
 msgid "Activate BetaSeries.com service"
-msgstr ""
+msgstr "Activate BetaSeries.com service"
 
 msgctxt "#30005"
 msgid "Mark as viewed only when watched for the first time"
-msgstr ""
+msgstr "Mark as viewed only when watched for the first time"
 
 msgctxt "#30006"
 msgid "BetaSeries.com username"
-msgstr ""
+msgstr "BetaSeries.com username"
 
 msgctxt "#30007"
 msgid "BetaSeries.com password"
-msgstr ""
+msgstr "BetaSeries.com password"
 
 msgctxt "#30008"
 msgid "Mark previous episodes as watched"
-msgstr ""
+msgstr "Mark previous episodes as watched"
 
 msgctxt "#30009"
-msgid "Update status when marking as viewed in XBMC"
-msgstr ""
+msgid "Update status when marking as viewed in KODI"
+msgstr "Update status when marking as viewed in KODI"
 
 msgctxt "#30010"
-msgid "Update status when marking as not viewed in XBMC"
-msgstr ""
+msgid "Update status when marking as not viewed in KODI"
+msgstr "Update status when marking as not viewed in KODI"
 
 msgctxt "#30011"
 msgid "Automatically add new watched shows"
-msgstr ""
+msgstr "Automatically add new watched shows"
 
 msgctxt "#30012"
 msgid "Notify on screen when marking episodes"
-msgstr ""
+msgstr "Notify on screen when marking episodes"
 
 msgctxt "#30013"
-msgid "Show added : "
-msgstr ""
+msgid "Show added : %s"
+msgstr "Show added : %s"
 
 msgctxt "#30014"
 msgid "Episode marked as watched !"
-msgstr ""
+msgstr "Episode marked as watched !"
 
 msgctxt "#30015"
 msgid "Episode marked as not watched !"
-msgstr ""
+msgstr "Episode marked as not watched !"
 
 msgctxt "#30016"
 msgid "Movie marked as watched !"
-msgstr ""
+msgstr "Movie marked as watched !"
 
 msgctxt "#30017"
 msgid "Movie marked as not watched !"
-msgstr ""
+msgstr "Movie marked as not watched !"
 
 msgctxt "#30018"
 msgid "Verbose logging"
+msgstr "Verbose logging"
 
 msgctxt "#30019"
 msgid "Update episodes seen from BS at each start"
+msgstr "Update episodes seen from BS at each start"
 
 msgctxt "#30020"
 msgid "Mark recently added file as downloaded on BS at each start"
+msgstr "Mark recently added file as downloaded on BS at each start"
 
 msgctxt "#30021"
 msgid "%s episode(s) marked as watched"
-
-#empty strings from id 30018 to 32000
+msgstr "%s episode(s) marked as watched"
 
 msgctxt "#30101"
 msgid "Episode marked as downloaded !"
-msgstr ""
+msgstr "Episode marked as downloaded !"
 
 msgctxt "#32001"
 msgid "Authentication error"
-msgstr ""
+msgstr "Authentication error"
 
 msgctxt "#32002"
-msgid "Please update the add-on"
-msgstr ""
+msgid "bad communication with BetaSeries.com"
+msgstr "bad communication with BetaSeries.com"
 
 msgctxt "#32003"
 msgid "Failed to connect to the site"
-msgstr ""
+msgstr "Failed to connect to the site"
 
 msgctxt "#32004"
 msgid "Login or password incorrect"
-msgstr ""
+msgstr "Login or password incorrect"
 
 msgctxt "#32005"
 msgid "Failed to add show : "
-msgstr ""
+msgstr "Failed to add show : "
 
 msgctxt "#32006"
 msgid "Failed to mark episode !"
-msgstr ""
+msgstr "Failed to mark episode !"
 
 msgctxt "#32007"
 msgid "Failed to mark movie !"
-msgstr ""
+msgstr "Failed to mark movie !"
 
 msgctxt "#32008"
 msgid "Authentication succeeded"
+msgstr "Authentication succeeded"
 
 msgctxt "#32009"
 msgid "Authentication failed"
+msgstr "Authentication failed"
+
+msgctxt "#32010"
+msgid "BetaSeries Agent"
+msgstr "BetaSeries Agent"
+
+

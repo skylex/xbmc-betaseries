@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- 0101 mettre au nouveau format -->
 <settings>
 	<category label="30000">
 		<setting id="betaactive" type="bool" label="30004" default="true"/>
@@ -11,7 +12,6 @@
 		<setting id="betafirst" type="bool" label="30005" default="false" enable="eq(-7,true)"/>
 		<setting id="betanotify" type="bool" label="30012" default="true" enable="eq(-8,true)"/>
 		<setting id="betaupdate" type="bool" label="30019" default="true" enable="eq(-9,true)"/>
-		<!-- <setting id="betadlded" type="bool" label="30020" default="false" enable="eq(-10,true)"/> -->
 		<setting id="betaverbose" type="bool" label="30018" default="false" enable="eq(-10,true)"/>
 	</category>
 </settings>
