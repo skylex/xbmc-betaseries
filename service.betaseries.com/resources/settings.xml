@@ -6,10 +6,10 @@
 		<setting id="betauser" type="text" label="30006" default="" enable="eq(-1,true)"/>
 		<setting id="betapass" type="text" label="30007" default="" enable="eq(-2,true)" option="hidden"/>
 		<setting id="betafollow" type="bool" label="30011" default="true" enable="eq(-3,true)"/>
-		<setting id="betabulk" type="bool" label="30008" default="true" enable="eq(-4,true)"/>
-		<setting id="betamark" type="bool" label="30009" default="false" enable="eq(-5,true)"/>
+		<setting id="betabulk" type="bool" label="30008" default="false" enable="eq(-4,true)"/>
+		<setting id="betamark" type="bool" label="30009" default="true" enable="eq(-5,true)"/>
 		<setting id="betaunmark" type="bool" label="30010" default="false" enable="eq(-6,true)"/>
-		<setting id="betafirst" type="bool" label="30005" default="false" enable="eq(-7,true)"/>
+		<setting id="betafirst" type="bool" label="30005" default="true" enable="eq(-7,true)"/>
 		<setting id="betanotify" type="bool" label="30012" default="true" enable="eq(-8,true)"/>
 		<setting id="betaupdate" type="bool" label="30019" default="true" enable="eq(-9,true)"/>
 		<setting id="betaverbose" type="bool" label="30018" default="false" enable="eq(-10,true)"/>

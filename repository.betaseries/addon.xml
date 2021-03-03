@@ -5,14 +5,14 @@
     </requires>
 	<extension point="xbmc.addon.repository" name="BetaSeries Add-on Repository">
         <dir minversion="16.0.0" maxversion="18.9.9">
-			<info compressed="false">https://raw.github.com/PCCV/xbmc-betaseries/leia/addons.xml</info>
-			<checksum>https://raw.github.com/PCCV/xbmc-betaseries/leia/addons.xml.md5</checksum>
-			<datadir zip="true">https://raw.github.com/PCCV/xbmc-betaseries/leia</datadir>
+			<info compressed="false">https://raw.github.com/skylex/xbmc-betaseries/leia/addons.xml</info>
+			<checksum>https://raw.github.com/skylex/xbmc-betaseries/skylex/addons.xml.md5</checksum>
+			<datadir zip="true">https://raw.github.com/skylex/xbmc-betaseries/leia</datadir>
         </dir>
         <dir minversion="19.0.0">
-			<info compressed="false">https://raw.github.com/PCCV/xbmc-betaseries/master/addons.xml</info>
-			<checksum>https://raw.github.com/PCCV/xbmc-betaseries/master/addons.xml.md5</checksum>
-			<datadir zip="true">https://raw.github.com/PCCV/xbmc-betaseries/master</datadir>
+			<info compressed="false">https://raw.github.com/skylex/xbmc-betaseries/master/addons.xml</info>
+			<checksum>https://raw.github.com/skylex/xbmc-betaseries/master/addons.xml.md5</checksum>
+			<datadir zip="true">https://raw.github.com/skylex/xbmc-betaseries/master</datadir>
         </dir>
 	</extension>
 	<extension point="xbmc.addon.metadata">

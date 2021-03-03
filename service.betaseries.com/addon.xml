@@ -15,7 +15,7 @@
         <platform>all</platform>
         <license> GPL-2.0-only</license>
         <website>https://Betaseries.com</website>
-        <source>https://github.com/kugan49/Kodi-betaseries</source>
+        <source>https://github.com/skylex/xbmc-betaseries</source>
         <news>
 	v2.0.0 (2021 02 23)
 	  - refactoring for Kodi 19 Matrix
