@@ -1,3 +1,6 @@
+1.1.0
+- compatibility with Kodi 19
+
 1.0.8
 - fix issue #17
 
