@@ -1,5 +1,5 @@
-1.1.0
-- compatibility with Kodi 19
+1.0.9
+- compatibility with Kodi 19 and python 3
 
 1.0.8
 - fix issue #17
