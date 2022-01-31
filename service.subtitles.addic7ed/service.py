@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, re, string, urllib, urllib2, socket, unicodedata, shutil
+import os, sys, re, string, urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, socket, unicodedata, shutil
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin, xbmcvfs
 
 __addon__        = xbmcaddon.Addon()
@@ -8,22 +8,19 @@ __addonid__      = __addon__.getAddonInfo('id')
 __addonname__    = __addon__.getAddonInfo('name')
 __icon__         = __addon__.getAddonInfo('icon')
 __language__     = __addon__.getLocalizedString
-__profile__      = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
-__temp__         = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
+__profile__      = xbmcvfs.translatePath( __addon__.getAddonInfo('profile') )
+__temp__         = xbmcvfs.translatePath( os.path.join( __profile__, 'temp') )
 
 sys.path.append( os.path.join( __profile__, "lib") )
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
-self_host = "http://www.addic7ed.com"
-self_user_agent = "Mozilla/5.0 (X11; Linux i686; rv:29.0) Gecko/20100101 Firefox/29.0"
-self_release_pattern = re.compile("Version (.+), ([0-9]+).([0-9])+ MBs.*")
+self_host = "https://www.addic7ed.com"
+self_user_agent = "Mozilla/5.0 (X11; Linux i686; rv:29.0) Gecko/20100101 Firefox/96.0"
+self_release_pattern = re.compile("Version (.+), Duration:")
 self_team_pattern = re.compile(".*-([^-]+)$")
 self_notify = __addon__.getSetting('notify') == 'true'
 
-if xbmcvfs.exists(__temp__):
-  shutil.rmtree(__temp__.encode("utf-8","ignore"))
-xbmcvfs.mkdirs(__temp__)
-
+# equivalent of SD teams to HD teams
 TEAMS = (
     # SD[0]              HD[1]
     ("lol|sys|dim",      "dimension"),
@@ -41,11 +38,11 @@ def other_team(team, team_from, team_to):
     log("other team not found")
     return team
 
-def normalize_string(str):
-    return unicodedata.normalize('NFKD', unicode(unicode(str, 'utf-8'))).encode('ascii','ignore')
+def normalize_string(txt):
+    return unicodedata.normalize('NFKD', txt).encode('ascii', 'ignore')
 
 def log(txt, level=xbmc.LOGDEBUG):
-    message = u'%s: %s' % (__addonid__, txt)
+    message = '%s: %s' % (__addonid__, txt)
     xbmc.log(msg=message, level=level)
 
 def get_params(string=""):
@@ -75,22 +72,23 @@ def get_url(url, referer=self_host):
     'Cache-Control': 'no-store, no-cache, must-revalidate',
     'Pragma': 'no-cache',
     'Referer': referer}
-    request = urllib2.Request(url, headers=req_headers)
-    opener = urllib2.build_opener()
+    request = urllib.request.Request(url, headers=req_headers)
+    opener = urllib.request.build_opener()
     try:
         response = opener.open(request)
         contents = response.read()
+        urllib.request.urlcleanup()
         return contents
-    except urllib2.HTTPError, e:
+    except urllib.error.HTTPError as e:
         log('HTTPError = ' + str(e.code), xbmc.LOGERROR)
-    except urllib2.URLError, e:
+    except urllib.error.URLError as e:
         log('URLError = ' + str(e.reason), xbmc.LOGERROR)
     except Exception:
         import traceback
         log('generic exception: ' + traceback.format_exc(), xbmc.LOGERROR)
     # when error occured
     if self_notify:
-        xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30008), 750, __icon__)).encode('utf-8', 'ignore'))
+        xbmc.executebuiltin(('Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30008), 750, __icon__)).encode('utf-8', 'ignore'))
     return False
 
 def download_subtitle(url, referer):
@@ -110,7 +108,7 @@ def get_soup(content):
     # check if page content can be used
     pattern = "subtitles from the source! - Addic7ed.com"
     try:
-        soup = BeautifulSoup(content)
+        soup = BeautifulSoup(content, "html.parser")
         title = str(soup.findAll("title")[0])
         if title.find(pattern) > -1:
             return soup
@@ -120,7 +118,7 @@ def get_soup(content):
     except:
         log("badly formatted content")
         if self_notify:
-            xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30009), 750, __icon__)).encode('utf-8', 'ignore'))
+            xbmc.executebuiltin(('Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30009), 750, __icon__)).encode('utf-8', 'ignore'))
         return False
 
 def search_subtitles(**search):
@@ -129,14 +127,15 @@ def search_subtitles(**search):
     # get video file name
     dirsync = __addon__.getSetting('dirsync') == 'true'
     if dirsync:
-        filename = os.path.basename(os.path.dirname(search['path'])).lower()
+        filename = os.path.basename(os.path.dirname(search['path']))
     else:
-        filename = os.path.basename(search['path']).lower()
+        filename = os.path.basename(search['path'])
         # remove file extension
         filename = re.sub("\.[^.]+$", "", filename)
     log("after filename = %s" % (filename))
     # replace some characters
-    name = re.sub("[ /]+", "_", search['name'].strip().lower())
+    name = search['name'].decode()
+    name = re.sub("[ /]+", "_", name.strip())
     log("after name = %s" % (name))
     # if it is a tvshow
     if search['video'] == "tvshow":
@@ -150,10 +149,10 @@ def search_subtitles(**search):
         name2 = re.sub("_\(.*\)$", "", name)
         log("after name2 = %s" % (name2))
         # set search url
-        searchurl = "%s/serie/%s/%s/%s/addic7ed" %(self_host, urllib.quote(name), search['season'], search['episode'])
-        searchurl2 = "%s/serie/%s/%s/%s/addic7ed" %(self_host, urllib.quote(name2), search['season'], search['episode'])
+        searchurl = "%s/serie/%s/%s/%s/addic7ed" %(self_host, urllib.parse.quote(name), search['season'], search['episode'])
+        searchurl2 = "%s/serie/%s/%s/%s/addic7ed" %(self_host, urllib.parse.quote(name2), search['season'], search['episode'])
     else:
-        searchurl = "%s/film/%s_(%s)-Download" %(self_host, urllib.quote(name), str(search['year']))
+        searchurl = "%s/film/%s_(%s)-Download" %(self_host, urllib.parse.quote(name), str(search['year']))
     # get searchurl
     log("search url = %s" % (searchurl))
     socket.setdefaulttimeout(10)
@@ -175,7 +174,7 @@ def search_subtitles(**search):
         # get version td
         html_version = html_tables.findNext("td", {"class":  "NewsTitle", "colspan" : "3"})
         subversion = self_release_pattern.match(str(html_version.contents[1])).groups()[0]
-        subversion = str(subversion).strip().replace(" ", "-").replace("--", "-")
+        subversion = str(subversion).strip().replace(" ", "-").replace("--", "-").replace("+", "-")
         # for each lang of this version
         for html_lang in html_tables.findAll("td", {"class" : "language"}):
             try:
@@ -199,7 +198,8 @@ def search_subtitles(**search):
                     log("unsupported language")
                     break
                 # get team name (everything after "-")
-                subteam = str(self_team_pattern.match("-" + subversion).groups()[0]).lower()
+                #subteam = self_team_pattern.match("-" + subversion).groups()[0].lower()
+                subteam = subversion.replace("-", "|")
                 log("after subteam = %s" % (subteam))
                 # find HD equivalent team if exists (or SD equivalent)
                 if filename.find("720p") > -1:
@@ -208,7 +208,7 @@ def search_subtitles(**search):
                     subteam2 = other_team(subteam,1,0)
                 log("after subteam2 = %s" % (subteam2))
                 # if team corresponds
-                if len(re.findall("-(" + subteam + "|" + subteam2 + ")$", filename)) > 0:
+                if len(re.findall(r"(?i)-(" + subteam + "|" + subteam2 + ")$", filename)) > 0:
                     # set sync tag
                     sync = True
                 else:
@@ -254,16 +254,16 @@ def search_subtitles(**search):
                 if lang2 in search['langs']:
                     # format subtitle name for GUI list
                     if search['video'] == "tvshow":
-                        subname = "%s.S%.2dE%.2d" %(name.replace("_", ".").title(), int(search['season']), int(search['episode']))
+                        subname = "%s.S%.2dE%.2d" %(name.replace(":", "").replace("_", ".").title(), int(search['season']), int(search['episode']))
                         # add version name
                         if subversion.find("-") > -1:
                             subname = "%s.%s" % (subname, subversion)
                         else:
                             subname = "%s-%s" % (subname, subversion)
                     else:
-                        subname = "%s-%s" %(name.replace("_", ".").title(), subversion)
+                        subname = "%s-%s" %(name.replace(":", "").replace("_", ".").title(), subversion)
                     # add subtitle to list
-                    subtitles.append({'order':order,'filename':subname,'link':link,'lang':lang,'lang2':lang2,"cc":cc,"sync":sync,"note":note})
+                    subtitles.append({'order': order, 'filename': subname, 'link': link, 'lang': lang, 'lang2': lang2, "cc": cc, "sync": sync, "note": note})
                     log("subtitle added : %s" % (subname))
                 log("--------------------------")
             except:
@@ -294,38 +294,48 @@ def search_subtitles(**search):
                 "3": "0"
             }[item["note"]]
             # xbmc list item format
-            listitem = xbmcgui.ListItem(label=item["lang"],
-              label2=item["filename"],
-              iconImage=item["rating"],
-              thumbnailImage=item["lang2"])
+            listitem = xbmcgui.ListItem(label=item["lang"], label2=item["filename"])
+            # set image and thumbnail
+            listitem.setArt({'icon': item["rating"], 'thumb': item["lang2"]})
             # setting sync / CC tag
             listitem.setProperty("sync", 'true' if item["sync"] else 'false')
             listitem.setProperty("hearing_imp", 'true' if item["cc"] else 'false')
             # adding item to GUI list
             url = "plugin://%s/?action=download&link=%s&filename=%s&searchurl=%s" % (__addonid__, item["link"], item["filename"], searchurl)
-            xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
+            xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False)
     else:
         if self_notify:
-            xbmc.executebuiltin((u'Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30010), 750, __icon__)).encode('utf-8', 'ignore'))
+            xbmc.executebuiltin(('Notification(%s,%s,%s,%s)' % (__addonname__, __language__(30010), 750, __icon__)).encode('utf-8', 'ignore'))
         log("nothing found")
     log("End of search_subtitles()")
 
-# start script
+
+# start of script
+
+# clean up
+if os.path.exists(__temp__):
+    log("deleting temp tree...")
+    shutil.rmtree(__temp__.encode("utf-8","ignore"))
+log("recreating temp dir...")
+xbmcvfs.mkdirs(__temp__)
+
+# get params
 params = get_params()
 
 # called when user is searching for subtitles
 if params['action'] == 'search':
-    item = {}
-    item['year']    = xbmc.getInfoLabel("VideoPlayer.Year")
-    item['season']  = str(xbmc.getInfoLabel("VideoPlayer.Season"))
-    item['episode'] = str(xbmc.getInfoLabel("VideoPlayer.Episode"))
-    item['tvshow']  = normalize_string(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))
-    item['title']   = normalize_string(xbmc.getInfoLabel("VideoPlayer.OriginalTitle"))
-    item['path']    = urllib.unquote(xbmc.Player().getPlayingFile().decode('utf-8'))
-    item['uilang']  = str(xbmc.getLanguage())
-    item['langs']   = []
+    item = {
+        'year': xbmc.getInfoLabel("VideoPlayer.Year"),
+        'season': str(xbmc.getInfoLabel("VideoPlayer.Season")),
+        'episode': str(xbmc.getInfoLabel("VideoPlayer.Episode")),
+        'tvshow': normalize_string(xbmc.getInfoLabel("VideoPlayer.TVshowtitle")),
+        'title': normalize_string(xbmc.getInfoLabel("VideoPlayer.OriginalTitle")),
+        'path': urllib.parse.unquote(xbmc.Player().getPlayingFile()),
+        'uilang': str(xbmc.getLanguage()),
+        'langs': []
+    }
     # get user preferred languages for subtitles
-    for lang in urllib.unquote(params['languages']).decode('utf-8').split(","):
+    for lang in urllib.parse.unquote(params['languages']).split(","):
         item['langs'].append(xbmc.convertLanguage(lang, xbmc.ISO_639_1))
     log("user langs = %s" % (item['langs']))
     # remove rar:// or stack://
@@ -335,6 +345,7 @@ if params['action'] == 'search':
         stackPath = item['path'].split(" , ")
         item['path'] = stackPath[0][8:]
     # call search_subtitles()
+    log("item = %s" % (item))
     if item['tvshow'] == "":
         search_subtitles(video="movie", name=item['title'], year=item['year'], path=item['path'], langs=item['langs'], uilang=item['uilang'])
     else:
@@ -347,6 +358,6 @@ elif params['action'] == 'download':
     if sub:
         # xbmc handles moving and using the subtitle
         listitem = xbmcgui.ListItem(label=sub)
-        xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=sub,listitem=listitem,isFolder=False)
+        xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=sub, listitem=listitem, isFolder=False)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

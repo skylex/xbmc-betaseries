@@ -1,3 +1,6 @@
+1.0.9
+- compatibility with Kodi 19 and python 3
+
 1.0.8
 - option did not work properly
 
