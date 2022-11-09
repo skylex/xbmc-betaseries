@@ -84,7 +84,7 @@ class Main:
                 break
 
     def _service_setup( self ):
-        self.apikey       = '5a85a0adc953'
+        self.apikey       = 'cca540f2c2c4'
         self.apiurl       = 'https://api.betaseries.com'
         self.apiver       = '2.2'
         self.Monitor      = MyMonitor(action = self._get_settings)
